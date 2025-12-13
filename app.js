@@ -1,129 +1,31 @@
 // ========================================
-// Configuration
+// Configuration (loaded from external files)
 // ========================================
 
-const CONFIG = {
-    cuisine: {
-        url: "PASTE_CUISINE_CSV_URL_HERE",
-        name: "Cucina"
-    },
-    bar: {
-        url: "PASTE_BAR_CSV_URL_HERE",
-        name: "Bar"
-    },
-    info: {
-        url: "PASTE_INFO_CSV_URL_HERE",
-        name: "Info"
+let TRANSLATIONS = {};
+let ALLERGENS = {};
+let FOOD_TYPES = {};
+
+// URL config (populated from config.json)
+let CONFIG = {
+    cuisine: { url: '', name: 'Cucina' },
+    bar: { url: '', name: 'Bar' },
+    info: { url: '', name: 'Info' }
+};
+
+async function loadTranslations() {
+    try {
+        const response = await fetch('translations.json?t=' + Date.now());
+        TRANSLATIONS = await response.json();
+    } catch (e) {
+        console.error('Could not load translations:', e);
+        // Fallback minimal translations
+        TRANSLATIONS = {
+            it: { loading: 'Caricamento...', errorMessage: 'Errore', allergens: {} },
+            en: { loading: 'Loading...', errorMessage: 'Error', allergens: {} }
+        };
     }
-};
-
-// ========================================
-// Translations
-// ========================================
-
-const TRANSLATIONS = {
-    it: {
-        filters: "Filtri",
-        dietPreferences: "Preferenze Alimentari",
-        dietAll: "Tutti",
-        dietVegetarian: "Vegetariano",
-        dietVegan: "Vegano",
-        excludeAllergens: "Escludi Allergeni",
-        excludeAllergensDesc: "I piatti con questi allergeni verranno nascosti.",
-        apply: "Applica",
-        clearAll: "Cancella tutto",
-        close: "Chiudi",
-        loading: "Caricamento menu...",
-        empty: "Nessun piatto corrisponde ai filtri.",
-        errorMessage: "Menu non disponibile.",
-        retry: "Riprova",
-        updated: "Menu aggiornato",
-        allergenDisclaimer: "Chiedi al personale per ulteriori dettagli sugli allergeni.",
-        navCuisine: "Cucina",
-        navBar: "Bar",
-        navInfo: "Info",
-        switchLang: "Passa a Inglese",
-        allergensExcluded: "allergeni esclusi",
-        allergens: {
-            glutine: "Glutine",
-            crostacei: "Crostacei",
-            uova: "Uova",
-            pesce: "Pesce",
-            arachidi: "Arachidi",
-            soia: "Soia",
-            latte: "Latte",
-            frutta_a_guscio: "Frutta a guscio",
-            sedano: "Sedano",
-            senape: "Senape",
-            sesamo: "Sesamo",
-            solfiti: "Solfiti",
-            lupini: "Lupini",
-            molluschi: "Molluschi"
-        }
-    },
-    en: {
-        filters: "Filters",
-        dietPreferences: "Dietary Preferences",
-        dietAll: "All",
-        dietVegetarian: "Vegetarian",
-        dietVegan: "Vegan",
-        excludeAllergens: "Exclude Allergens",
-        excludeAllergensDesc: "Dishes with these allergens will be hidden.",
-        apply: "Apply",
-        clearAll: "Clear all",
-        close: "Close",
-        loading: "Loading menu...",
-        empty: "No dishes match your filters.",
-        errorMessage: "Menu unavailable.",
-        retry: "Retry",
-        updated: "Menu updated",
-        allergenDisclaimer: "Ask staff for allergen details.",
-        navCuisine: "Kitchen",
-        navBar: "Bar",
-        navInfo: "Info",
-        switchLang: "Switch to Italian",
-        allergensExcluded: "allergens excluded",
-        allergens: {
-            glutine: "Gluten",
-            crostacei: "Shellfish",
-            uova: "Eggs",
-            pesce: "Fish",
-            arachidi: "Peanuts",
-            soia: "Soy",
-            latte: "Milk",
-            frutta_a_guscio: "Tree nuts",
-            sedano: "Celery",
-            senape: "Mustard",
-            sesamo: "Sesame",
-            solfiti: "Sulphites",
-            lupini: "Lupin",
-            molluschi: "Molluscs"
-        }
-    }
-};
-
-const ALLERGENS = {
-    'all_1_glutine': { number: 1, key: 'glutine', icon: '🌾' },
-    'all_2_crostacei': { number: 2, key: 'crostacei', icon: '🦐' },
-    'all_3_uova': { number: 3, key: 'uova', icon: '🥚' },
-    'all_4_pesce': { number: 4, key: 'pesce', icon: '🐟' },
-    'all_5_arachidi': { number: 5, key: 'arachidi', icon: '🥜' },
-    'all_6_soia': { number: 6, key: 'soia', icon: '🫘' },
-    'all_7_latte': { number: 7, key: 'latte', icon: '🥛' },
-    'all_8_frutta_a_guscio': { number: 8, key: 'frutta_a_guscio', icon: '🌰' },
-    'all_9_sedano': { number: 9, key: 'sedano', icon: '🥬' },
-    'all_10_senape': { number: 10, key: 'senape', icon: '🟡' },
-    'all_11_sesamo': { number: 11, key: 'sesamo', icon: '🫛' },
-    'all_12_solfiti': { number: 12, key: 'solfiti', icon: '🍷' },
-    'all_13_lupini': { number: 13, key: 'lupini', icon: '🌸' },
-    'all_14_molluschi': { number: 14, key: 'molluschi', icon: '🐚' }
-};
-
-const FOOD_TYPES = {
-    'standard': { labelKey: '', icon: '', class: '' },
-    'vegetariano': { labelKey: 'dietVegetarian', icon: '🌿', class: 'vegetariano' },
-    'vegano': { labelKey: 'dietVegan', icon: '🌱', class: 'vegano' }
-};
+}
 
 // ========================================
 // Preferences Storage
@@ -577,12 +479,12 @@ async function loadConfig() {
 function applyConfig() {
     if (!state.config) return;
 
-    const { app, location, contact, urls } = state.config;
+    const { app, urls, allergens, foodTypes } = state.config;
 
     // Apply branding
-    if (app.name) elements.storeName.textContent = app.name;
-    if (app.accentColor) document.documentElement.style.setProperty('--color-accent', app.accentColor);
-    if (app.logoUrl) {
+    if (app?.name) elements.storeName.textContent = app.name;
+    if (app?.accentColor) document.documentElement.style.setProperty('--color-accent', app.accentColor);
+    if (app?.logoUrl) {
         elements.storeLogo.src = app.logoUrl;
         elements.storeLogo.hidden = false;
     }
@@ -592,6 +494,16 @@ function applyConfig() {
         CONFIG.cuisine.url = urls.cuisine;
         CONFIG.bar.url = urls.bar;
         CONFIG.info = { url: urls.info, name: 'Info' };
+    }
+
+    // Set ALLERGENS from config
+    if (allergens) {
+        ALLERGENS = allergens;
+    }
+
+    // Set FOOD_TYPES from config
+    if (foodTypes) {
+        FOOD_TYPES = foodTypes;
     }
 }
 
@@ -1173,16 +1085,18 @@ function init() {
     // Scroll to top on page load
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    // Set initial language
-    updateUILanguage();
-    updateActiveFilterDisplay();
+    // Load translations first, then config, then data
+    loadTranslations().then(() => {
+        // Set initial language after translations loaded
+        updateUILanguage();
+        updateActiveFilterDisplay();
 
-    // Fetch config first, then preload all data
-    loadConfig().then(() => {
-        // Preload all tabs for instant switching
-        fetchData('cuisine');
-        fetchData('bar');
-        fetchData('info');
+        // Fetch config, then preload all data
+        loadConfig().then(() => {
+            fetchData('cuisine');
+            fetchData('bar');
+            fetchData('info');
+        });
     });
 
     // Smart refresh on visibility change

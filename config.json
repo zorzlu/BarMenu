@@ -38,5 +38,94 @@
         "cuisine": "cuisine.csv",
         "bar": "bar.csv",
         "info": "info.csv"
+    },
+    "allergens": {
+        "all_1_glutine": {
+            "number": 1,
+            "key": "glutine",
+            "icon": "🌾"
+        },
+        "all_2_crostacei": {
+            "number": 2,
+            "key": "crostacei",
+            "icon": "🦐"
+        },
+        "all_3_uova": {
+            "number": 3,
+            "key": "uova",
+            "icon": "🥚"
+        },
+        "all_4_pesce": {
+            "number": 4,
+            "key": "pesce",
+            "icon": "🐟"
+        },
+        "all_5_arachidi": {
+            "number": 5,
+            "key": "arachidi",
+            "icon": "🥜"
+        },
+        "all_6_soia": {
+            "number": 6,
+            "key": "soia",
+            "icon": "🫘"
+        },
+        "all_7_latte": {
+            "number": 7,
+            "key": "latte",
+            "icon": "🥛"
+        },
+        "all_8_frutta_a_guscio": {
+            "number": 8,
+            "key": "frutta_a_guscio",
+            "icon": "🌰"
+        },
+        "all_9_sedano": {
+            "number": 9,
+            "key": "sedano",
+            "icon": "🥬"
+        },
+        "all_10_senape": {
+            "number": 10,
+            "key": "senape",
+            "icon": "🟡"
+        },
+        "all_11_sesamo": {
+            "number": 11,
+            "key": "sesamo",
+            "icon": "🫛"
+        },
+        "all_12_solfiti": {
+            "number": 12,
+            "key": "solfiti",
+            "icon": "🍷"
+        },
+        "all_13_lupini": {
+            "number": 13,
+            "key": "lupini",
+            "icon": "🌸"
+        },
+        "all_14_molluschi": {
+            "number": 14,
+            "key": "molluschi",
+            "icon": "🐚"
+        }
+    },
+    "foodTypes": {
+        "standard": {
+            "labelKey": "",
+            "icon": "",
+            "class": ""
+        },
+        "vegetariano": {
+            "labelKey": "dietVegetarian",
+            "icon": "🌿",
+            "class": "vegetariano"
+        },
+        "vegano": {
+            "labelKey": "dietVegan",
+            "icon": "🌱",
+            "class": "vegano"
+        }
     }
 }
