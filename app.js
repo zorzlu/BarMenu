@@ -785,45 +785,7 @@ function renderInfoPage() {
     const lang = state.currentLanguage;
     let html = '';
 
-
-
-    // 1. Static Location Card (from JSON)
-    if (config.location || config.contact) {
-        html += `<section class="info-card location-card">`;
-
-        if (config.location?.address) {
-            html += `<h3 class="location-address">${escapeHTML(config.location.address)}</h3>`;
-        }
-
-        if (config.contact) {
-            if (config.contact.phone) {
-                html += `
-                    <a href="tel:${config.contact.phone.replace(/\s/g, '')}" class="contact-row">
-                        <span>📞</span> ${escapeHTML(config.contact.phone)}
-                    </a>
-                `;
-            }
-            if (config.contact.email) {
-                html += `
-                    <a href="mailto:${config.contact.email}" class="contact-row">
-                        <span>✉️</span> ${escapeHTML(config.contact.email)}
-                    </a>
-                `;
-            }
-        }
-
-        if (config.location?.mapUrl) {
-            const mapLabel = lang === 'it' ? 'Vedi su Mappa' : 'View on Map';
-            html += `
-                <a href="${config.location.mapUrl}" target="_blank" class="map-embed">
-                    🗺️ ${mapLabel}
-                </a>
-            `;
-        }
-        html += `</section>`;
-    }
-
-    // 2. Content Items (texts and CTAs in CSV order)
+    // 1. Content Items (texts and CTAs in CSV order)
     data.contentItems.forEach(item => {
         if (item.type === 'text') {
             const label = lang === 'it' ? item.label_it : item.label_en;
@@ -846,7 +808,7 @@ function renderInfoPage() {
         }
     });
 
-    // 3. Timetables (from CSV - localized)
+    // 2. Timetables (from CSV - localized)
     const hoursLocationTitle = lang === 'it' ? 'Orari Apertura' : 'Opening Hours';
     const hoursKitchenTitle = lang === 'it' ? 'Orari Cucina' : 'Kitchen Hours';
 
@@ -884,18 +846,75 @@ function renderInfoPage() {
         html += `</section>`;
     }
 
-    // 5. Socials (from JSON)
-    const socialLinks = config.contact?.socials || [];
-    if (socialLinks.length > 0) {
-        html += `<div class="social-grid">`;
-        socialLinks.forEach(soc => {
+    // 3. Contacts Section (at the end, flat style)
+    const hasAddress = config.contact?.address;
+    const hasPhone = config.contact?.phone;
+    const hasEmail = config.contact?.email;
+    const hasSocials = config.contact?.socials && config.contact.socials.length > 0;
+    const hasWebsites = config.contact?.websites && config.contact.websites.length > 0;
+
+    if (hasAddress || hasPhone || hasEmail || hasSocials || hasWebsites) {
+        const contactsTitle = lang === 'it' ? 'Contatti' : 'Contacts';
+        html += `<section class="info-section contacts-section">`;
+        html += `<h2 class="info-title">${contactsTitle}</h2>`;
+
+        if (hasAddress) {
             html += `
-                <a href="${soc.url}" target="_blank" class="social-link">
-                    <span>${soc.icon || '🔗'}</span> ${escapeHTML(soc.name)}
+                <div class="contact-row">
+                    <span class="fluent-icon" aria-hidden="true">&#xf481;</span>
+                    ${escapeHTML(config.contact.address)}
+                </div>
+            `;
+        }
+        if (hasPhone) {
+            html += `
+                <a href="tel:${config.contact.phone.replace(/\s/g, '')}" class="contact-row">
+                    <span class="fluent-icon" aria-hidden="true">&#xe271;</span>
+                    ${escapeHTML(config.contact.phone)}
                 </a>
             `;
-        });
-        html += `</div>`;
+        }
+        if (hasEmail) {
+            html += `
+                <a href="mailto:${config.contact.email}" class="contact-row">
+                    <span class="fluent-icon" aria-hidden="true">&#xf507;</span>
+                    ${escapeHTML(config.contact.email)}
+                </a>
+            `;
+        }
+
+        // Social links
+        if (hasSocials) {
+            config.contact.socials.forEach(social => {
+                let iconHtml = '';
+                if (social.name.toLowerCase() === 'instagram') {
+                    iconHtml = `<img src="icons/Instagram_Glyph_Black.svg" alt="" class="social-icon" aria-hidden="true">`;
+                } else {
+                    iconHtml = `<span class="fluent-icon" aria-hidden="true">&#xf583;</span>`;
+                }
+                html += `
+                    <a href="${social.url}" target="_blank" rel="noopener" class="contact-row">
+                        ${iconHtml}
+                        <span class="link-name">${escapeHTML(social.name)}</span>
+                        <span class="link-label">${escapeHTML(social.label)}</span>
+                    </a>
+                `;
+            });
+        }
+
+        // Website links
+        if (hasWebsites) {
+            config.contact.websites.forEach(site => {
+                html += `
+                    <a href="${site.url}" target="_blank" rel="noopener" class="contact-row">
+                        <span class="fluent-icon" aria-hidden="true">&#xf45b;</span>
+                        <span class="link-label">${escapeHTML(site.label)}</span>
+                    </a>
+                `;
+            });
+        }
+
+        html += `</section>`;
     }
 
     elements.infoContainer.innerHTML = html;
@@ -1036,6 +1055,9 @@ function applyFiltersFromModal() {
     closeFilterModal();
     render();
 
+    // Scroll to top to show filtered results from beginning
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
     // Save preferences to localStorage
     savePreferences();
 
@@ -1148,13 +1170,19 @@ document.addEventListener('keydown', (e) => {
 // ========================================
 
 function init() {
+    // Scroll to top on page load
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
     // Set initial language
     updateUILanguage();
     updateActiveFilterDisplay();
 
-    // Fetch config first, then data
+    // Fetch config first, then preload all data
     loadConfig().then(() => {
+        // Preload all tabs for instant switching
         fetchData('cuisine');
+        fetchData('bar');
+        fetchData('info');
     });
 
     // Smart refresh on visibility change
@@ -1165,7 +1193,10 @@ function init() {
             const STALE_THRESHOLD = 5 * 60 * 1000;
 
             if (!last || (now - last > STALE_THRESHOLD)) {
-                fetchData(state.currentTab);
+                // Refresh all tabs when returning after being stale
+                fetchData('cuisine');
+                fetchData('bar');
+                fetchData('info');
             }
         }
     });

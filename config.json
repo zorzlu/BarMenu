@@ -11,23 +11,26 @@
         "currencySymbol": "€",
         "timeFormat": "24h"
     },
-    "location": {
-        "address": "Via Roma 123, 00100 Roma",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Via+Roma+123+Roma"
-    },
     "contact": {
+        "address": "Via Roma 123, 00100 Roma",
         "phone": "+39 06 12345678",
         "email": "info@iltuobar.com",
         "socials": [
             {
                 "name": "Instagram",
-                "url": "https://instagram.com",
-                "icon": "📸"
+                "label": "@iltuobar",
+                "url": "https://instagram.com/iltuobar"
             },
             {
                 "name": "Facebook",
-                "url": "https://facebook.com",
-                "icon": "👍"
+                "label": "Il Tuo Bar",
+                "url": "https://facebook.com/iltuobar"
+            }
+        ],
+        "websites": [
+            {
+                "label": "www.iltuobar.it",
+                "url": "https://www.iltuobar.it"
             }
         ]
     },
