@@ -233,6 +233,10 @@ button:focus-visible {
     -webkit-overflow-scrolling: touch;
 }
 
+.filter-bar[hidden] {
+    display: none;
+}
+
 .filter-trigger {
     display: flex;
     align-items: center;
@@ -620,6 +624,48 @@ button:focus-visible {
     width: 100%;
 }
 
+/* Menu Header */
+.menu-header {
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
+.menu-header-card {
+    background: linear-gradient(135deg, var(--color-accent), #5856d6);
+    color: white;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-card);
+}
+
+.menu-header-card .menu-header-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.menu-header-card .menu-header-text {
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    opacity: 0.95;
+}
+
+.menu-header-plain {
+    padding: var(--spacing-sm) 0;
+}
+
+.menu-header-plain .menu-header-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 4px;
+}
+
+.menu-header-plain .menu-header-text {
+    font-size: var(--font-size-base);
+    color: var(--color-secondary);
+}
+
 /* Category Section */
 .category-section {
     margin-bottom: var(--spacing-lg);
@@ -647,17 +693,13 @@ button:focus-visible {
     border-radius: var(--border-radius);
     padding: var(--spacing-md);
     box-shadow: var(--shadow-card);
-    transition: transform 0.2s ease;
-}
-
-.menu-item:active {
-    transform: scale(0.98);
 }
 
 .item-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--spacing-sm);
     margin-bottom: 4px;
 }
@@ -674,24 +716,35 @@ button:focus-visible {
     font-weight: 600;
     color: var(--color-primary);
     line-height: 1.25;
+    margin: 0;
 }
 
 .item-price {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
     font-weight: 700;
     color: var(--color-primary);
     background: var(--color-bg);
-    padding: 4px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
     white-space: nowrap;
     flex-shrink: 0;
+    line-height: 1.25;
 }
 
 .item-description {
     font-size: var(--font-size-sm);
     color: var(--color-secondary);
     line-height: 1.4;
-    margin-bottom: var(--spacing-sm);
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+/* Item Footer (diet badge + allergens row) */
+.item-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
 }
 
 /* Food Type Badge */
@@ -699,11 +752,11 @@ button:focus-visible {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 3px 8px;
+    padding: 4px 8px;
     border-radius: 6px;
     font-size: 0.7rem;
     font-weight: 600;
-    width: fit-content;
+    line-height: 1;
 }
 
 .food-type-badge.vegetariano {
@@ -717,15 +770,13 @@ button:focus-visible {
 }
 
 .food-type-icon {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    line-height: 1;
 }
 
 /* Allergen Pills */
 .allergen-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
+    display: contents;
 }
 
 .allergen-chip {
@@ -738,10 +789,12 @@ button:focus-visible {
     font-size: 0.7rem;
     font-weight: 600;
     color: var(--color-accent);
+    line-height: 1;
 }
 
 .allergen-icon {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    line-height: 1;
 }
 
 /* Footer Info */
@@ -790,6 +843,10 @@ button:focus-visible {
     align-items: center;
 }
 
+.error-banner[hidden] {
+    display: none;
+}
+
 .retry-button {
     background: rgba(255, 255, 255, 0.2);
     border: none;
@@ -825,4 +882,203 @@ button:focus-visible {
     .allergen-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+}
+
+/* ========================================
+   Info Page Styles
+   ======================================== */
+
+/* Header Branding */
+.brand-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.store-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    /* Slightly rounded square */
+    object-fit: cover;
+}
+
+/* Info Container */
+.info-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing-md);
+    width: 100%;
+}
+
+.info-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.info-section-card {
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-card);
+}
+
+.info-section-plain {
+    padding: var(--spacing-sm) 0;
+}
+
+.info-card {
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-card);
+    margin-bottom: var(--spacing-md);
+}
+
+.info-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.info-text {
+    font-size: var(--font-size-base);
+    color: var(--color-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Timetable Grid */
+.timetable-grid {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.time-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-separator);
+}
+
+.time-row:last-child {
+    border-bottom: none;
+}
+
+.time-days {
+    font-weight: 600;
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.time-hours {
+    color: var(--color-secondary);
+    text-align: right;
+}
+
+/* Stack day/time vertically on very small screens */
+@media (max-width: 320px) {
+    .time-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .time-hours {
+        text-align: left;
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* CTA Buttons */
+.cta-grid {
+    display: grid;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cta-btn:active {
+    transform: scale(0.98);
+}
+
+.cta-btn.primary {
+    background: var(--color-accent);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cta-btn.secondary {
+    background: var(--color-surface);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+}
+
+/* Social Grid */
+.social-grid {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--color-surface);
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--color-primary);
+    font-weight: 500;
+    box-shadow: var(--shadow-card);
+}
+
+/* Location Card */
+.location-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.location-address {
+    font-size: var(--font-size-base);
+    color: var(--color-primary);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.contact-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+}
+
+.map-embed {
+    width: 100%;
+    height: 150px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-tertiary);
+    text-decoration: none;
+    margin-top: var(--spacing-sm);
 }

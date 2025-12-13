@@ -10,6 +10,10 @@ const CONFIG = {
     bar: {
         url: "PASTE_BAR_CSV_URL_HERE",
         name: "Bar"
+    },
+    info: {
+        url: "PASTE_INFO_CSV_URL_HERE",
+        name: "Info"
     }
 };
 
@@ -37,6 +41,7 @@ const TRANSLATIONS = {
         allergenDisclaimer: "Chiedi al personale per ulteriori dettagli sugli allergeni.",
         navCuisine: "Cucina",
         navBar: "Bar",
+        navInfo: "Info",
         switchLang: "Passa a Inglese",
         allergensExcluded: "allergeni esclusi",
         allergens: {
@@ -75,6 +80,7 @@ const TRANSLATIONS = {
         allergenDisclaimer: "Ask staff for allergen details.",
         navCuisine: "Kitchen",
         navBar: "Bar",
+        navInfo: "Info",
         switchLang: "Switch to Italian",
         allergensExcluded: "allergens excluded",
         allergens: {
@@ -160,8 +166,9 @@ const savedPrefs = loadPreferences();
 let state = {
     currentTab: 'cuisine',
     currentLanguage: savedPrefs?.language || 'it',
-    data: { cuisine: null, bar: null },
-    lastFetch: { cuisine: null, bar: null },
+    config: null,
+    data: { cuisine: null, bar: null, info: null },
+    lastFetch: { cuisine: null, bar: null, info: null },
     filters: {
         diet: savedPrefs?.diet || 'all',
         excludeAllergens: savedPrefs?.excludeAllergens || []
@@ -185,6 +192,9 @@ const elements = {
     loadingState: document.getElementById('loadingState'),
     emptyState: document.getElementById('emptyState'),
     menuContainer: document.getElementById('menuContainer'),
+    infoContainer: document.getElementById('infoContainer'),
+    storeLogo: document.getElementById('storeLogo'),
+    storeName: document.getElementById('storeName'),
     navItems: document.querySelectorAll('.nav-item'),
     // Filter elements
     filterTrigger: document.getElementById('filterTrigger'),
@@ -214,6 +224,28 @@ function t(key) {
 function tAllergen(key) {
     const lang = state.currentLanguage;
     return TRANSLATIONS[lang].allergens[key] || TRANSLATIONS['it'].allergens[key] || key;
+}
+
+function formatPrice(price) {
+    if (!price) return '';
+    const config = state.config;
+    const locale = config?.regional?.locale || 'it-IT';
+    const currency = config?.regional?.currency || 'EUR';
+
+    // Parse the price (handle both number and string with comma/dot)
+    let numPrice = typeof price === 'number' ? price : parseFloat(String(price).replace(',', '.'));
+    if (isNaN(numPrice)) return price; // Return as-is if not parseable
+
+    try {
+        return new Intl.NumberFormat(locale, {
+            style: 'currency',
+            currency: currency
+        }).format(numPrice);
+    } catch (e) {
+        // Fallback if Intl fails
+        const symbol = config?.regional?.currencySymbol || '€';
+        return `${symbol} ${numPrice.toFixed(2)}`;
+    }
 }
 
 function updateUILanguage() {
@@ -378,6 +410,121 @@ function processMenuData(rawData) {
     };
 }
 
+// Day order for sorting and collapse logic
+const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+function collapseAdjacentDays(entries) {
+    if (entries.length === 0) return [];
+
+    // Sort by day order
+    entries.sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day));
+
+    const groups = [];
+    let currentGroup = null;
+
+    entries.forEach(entry => {
+        const signature = `${entry.slot1}|${entry.slot2}`;
+        if (currentGroup && currentGroup.signature === signature) {
+            currentGroup.endEntry = entry;
+        } else {
+            if (currentGroup) groups.push(currentGroup);
+            currentGroup = {
+                startEntry: entry,
+                endEntry: entry,
+                signature,
+                slot1: entry.slot1,
+                slot2: entry.slot2
+            };
+        }
+    });
+    if (currentGroup) groups.push(currentGroup);
+
+    return groups.map(g => ({
+        days_it: g.startEntry === g.endEntry
+            ? g.startEntry.label_it
+            : `${g.startEntry.label_it} - ${g.endEntry.label_it}`,
+        days_en: g.startEntry === g.endEntry
+            ? g.startEntry.label_en
+            : `${g.startEntry.label_en} - ${g.endEntry.label_en}`,
+        slot1: g.slot1,
+        slot2: g.slot2
+    }));
+}
+
+function processInfoData(rawData) {
+    const sections = {
+        hoursLocationRaw: [],
+        hoursKitchenRaw: [],
+        hoursLocation: [],
+        hoursKitchen: [],
+        menuHeaderCuisine: null,
+        menuHeaderBar: null,
+        contentItems: [] // Preserves order of texts and CTAs
+    };
+
+    rawData.forEach(row => {
+        const type = (row.type || '').toLowerCase().trim();
+        const day = (row.day || '').toLowerCase().trim();
+
+        if (type === 'hours_location' && day) {
+            sections.hoursLocationRaw.push({
+                day,
+                label_it: row.label_it || '',
+                label_en: row.label_en || '',
+                slot1: row.slot1_open && row.slot1_close ? `${row.slot1_open} - ${row.slot1_close}` : '',
+                slot2: row.slot2_open && row.slot2_close ? `${row.slot2_open} - ${row.slot2_close}` : ''
+            });
+        } else if (type === 'hours_kitchen' && day) {
+            sections.hoursKitchenRaw.push({
+                day,
+                label_it: row.label_it || '',
+                label_en: row.label_en || '',
+                slot1: row.slot1_open && row.slot1_close ? `${row.slot1_open} - ${row.slot1_close}` : '',
+                slot2: row.slot2_open && row.slot2_close ? `${row.slot2_open} - ${row.slot2_close}` : ''
+            });
+        } else if (type === 'menu_header_cuisine') {
+            sections.menuHeaderCuisine = {
+                title_it: row.label_it || '',
+                title_en: row.label_en || '',
+                text_it: row.text_it || '',
+                text_en: row.text_en || '',
+                style: row.style || 'card'
+            };
+        } else if (type === 'menu_header_bar') {
+            sections.menuHeaderBar = {
+                title_it: row.label_it || '',
+                title_en: row.label_en || '',
+                text_it: row.text_it || '',
+                text_en: row.text_en || '',
+                style: row.style || 'card'
+            };
+        } else if (type === 'text') {
+            sections.contentItems.push({
+                type: 'text',
+                label_it: row.label_it || '',
+                label_en: row.label_en || '',
+                text_it: row.text_it || '',
+                text_en: row.text_en || '',
+                style: row.style || 'plain'
+            });
+        } else if (type === 'cta') {
+            sections.contentItems.push({
+                type: 'cta',
+                label_it: row.label_it || '',
+                label_en: row.label_en || '',
+                link: row.link || '',
+                style: row.style || 'secondary'
+            });
+        }
+    });
+
+    // Collapse adjacent days with same time slots
+    sections.hoursLocation = collapseAdjacentDays(sections.hoursLocationRaw);
+    sections.hoursKitchen = collapseAdjacentDays(sections.hoursKitchenRaw);
+
+    return sections;
+}
+
 // ========================================
 // Filtering Logic
 // ========================================
@@ -414,7 +561,43 @@ function applyFiltersToData(categories) {
 // Core Logic
 // ========================================
 
+async function loadConfig() {
+    try {
+        const response = await fetch('config.json?t=' + Date.now());
+        if (!response.ok) throw new Error('Config load failed');
+        state.config = await response.json();
+        applyConfig();
+    } catch (e) {
+        console.error('Failed to load config:', e);
+        // Fallback or critical error handling
+        elements.storeName.textContent = 'Configuration Error';
+    }
+}
+
+function applyConfig() {
+    if (!state.config) return;
+
+    const { app, location, contact, urls } = state.config;
+
+    // Apply branding
+    if (app.name) elements.storeName.textContent = app.name;
+    if (app.accentColor) document.documentElement.style.setProperty('--color-accent', app.accentColor);
+    if (app.logoUrl) {
+        elements.storeLogo.src = app.logoUrl;
+        elements.storeLogo.hidden = false;
+    }
+
+    // Update CONFIG URLs
+    if (urls) {
+        CONFIG.cuisine.url = urls.cuisine;
+        CONFIG.bar.url = urls.bar;
+        CONFIG.info = { url: urls.info, name: 'Info' };
+    }
+}
+
 async function fetchData(tab) {
+    if (!CONFIG[tab]) return;
+
     let url = CONFIG[tab].url;
     let usingFallback = false;
 
@@ -424,12 +607,14 @@ async function fetchData(tab) {
 
     try {
         let response;
+        let text;
 
         if (!usingFallback) {
             try {
                 const fetchUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
                 response = await fetch(fetchUrl);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                text = await response.text();
             } catch (err) {
                 console.warn(`Remote fetch failed (${err.message}). Switching to fallback.`);
                 usingFallback = true;
@@ -439,10 +624,11 @@ async function fetchData(tab) {
         if (usingFallback) {
             response = await fetch(`./${tab}.csv?t=${Date.now()}`);
             if (!response.ok) throw new Error(`Local file not found: ${response.status}`);
+            text = await response.text();
         }
 
-        const text = await response.text();
-        const data = processMenuData(parseCSV(text));
+        const parsed = parseCSV(text);
+        const data = tab === 'info' ? processInfoData(parsed) : processMenuData(parsed);
 
         state.data[tab] = data;
         state.lastFetch[tab] = new Date();
@@ -452,6 +638,8 @@ async function fetchData(tab) {
             elements.errorBanner.hidden = true;
             if (!elements.loadingState.hidden) elements.loadingState.hidden = true;
             showUpdateIndicator();
+            // Scroll to top after new data loads
+            window.scrollTo({ top: 0, behavior: 'instant' });
         }
 
     } catch (e) {
@@ -459,7 +647,11 @@ async function fetchData(tab) {
         if (state.currentTab === tab) {
             elements.errorBanner.hidden = false;
             elements.loadingState.hidden = true;
-            if (!state.data[tab]) elements.menuContainer.hidden = true;
+            if (state.currentTab === 'info') {
+                elements.infoContainer.hidden = true;
+            } else if (!state.data[tab]) {
+                elements.menuContainer.hidden = true;
+            }
         }
     }
 }
@@ -485,6 +677,20 @@ function render() {
 
     elements.loadingState.hidden = true;
 
+    if (tab === 'info') {
+        // Hide filter bar on Info tab
+        document.querySelector('.filter-bar').hidden = true;
+        renderInfoPage();
+        elements.menuContainer.hidden = true;
+        elements.infoContainer.hidden = false;
+        elements.emptyState.hidden = true;
+        return;
+    }
+
+    // Show filter bar on menu tabs
+    document.querySelector('.filter-bar').hidden = false;
+
+    elements.infoContainer.hidden = true;
     const filteredCategories = applyFiltersToData(data.categories);
 
     if (filteredCategories.length === 0) {
@@ -499,6 +705,25 @@ function render() {
     const lang = state.currentLanguage;
     let html = '';
 
+    // Menu header (if available from info.csv)
+    const infoData = state.data.info;
+    if (infoData) {
+        const header = tab === 'cuisine' ? infoData.menuHeaderCuisine : infoData.menuHeaderBar;
+        if (header) {
+            const title = lang === 'it' ? header.title_it : header.title_en;
+            const text = lang === 'it' ? header.text_it : header.text_en;
+            if (text || title) {
+                const isCard = header.style === 'card';
+                html += `
+                    <div class="menu-header ${isCard ? 'menu-header-card' : 'menu-header-plain'}">
+                        ${title ? `<h2 class="menu-header-title">${escapeHTML(title)}</h2>` : ''}
+                        ${text ? `<p class="menu-header-text">${escapeHTML(text)}</p>` : ''}
+                    </div>
+                `;
+            }
+        }
+    }
+
     filteredCategories.forEach(cat => {
         html += `
             <section class="category-section">
@@ -511,23 +736,37 @@ function render() {
             const desc = lang === 'it' ? item.desc_it : item.desc_en;
             const foodType = FOOD_TYPES[item.tipo] || FOOD_TYPES['standard'];
             const foodTypeLabel = foodType.labelKey ? t(foodType.labelKey) : '';
+            const priceFormatted = formatPrice(item.price);
+
+            // Build footer row with diet badge and allergens
+            let footerHtml = '';
+            const hasDietBadge = foodTypeLabel;
+            const hasAllergens = item.allergens && item.allergens.length > 0;
+
+            if (hasDietBadge || hasAllergens) {
+                footerHtml = '<div class="item-footer">';
+                if (hasDietBadge) {
+                    footerHtml += `
+                        <span class="food-type-badge ${foodType.class}">
+                            <span class="food-type-icon">${foodType.icon}</span>
+                            ${foodTypeLabel}
+                        </span>
+                    `;
+                }
+                if (hasAllergens) {
+                    footerHtml += renderAllergens(item.allergens);
+                }
+                footerHtml += '</div>';
+            }
 
             html += `
                 <article class="menu-item">
                     <div class="item-header">
-                        <div class="item-name-wrapper">
-                            <h3 class="item-name">${escapeHTML(name)}</h3>
-                            ${foodTypeLabel ? `
-                                <span class="food-type-badge ${foodType.class}" aria-label="${foodTypeLabel}">
-                                    <span class="food-type-icon">${foodType.icon}</span>
-                                    ${foodTypeLabel}
-                                </span>
-                            ` : ''}
-                        </div>
-                        ${item.price ? `<span class="item-price">€ ${item.price}</span>` : ''}
+                        <h3 class="item-name">${escapeHTML(name)}</h3>
+                        ${priceFormatted ? `<span class="item-price">${priceFormatted}</span>` : ''}
                     </div>
                     ${desc ? `<p class="item-description">${escapeHTML(desc)}</p>` : ''}
-                    ${renderAllergens(item.allergens)}
+                    ${footerHtml}
                 </article>
             `;
         });
@@ -536,6 +775,130 @@ function render() {
     });
 
     elements.menuContainer.innerHTML = html;
+}
+
+function renderInfoPage() {
+    const data = state.data.info;
+    const config = state.config;
+    if (!data || !config) return;
+
+    const lang = state.currentLanguage;
+    let html = '';
+
+
+
+    // 1. Static Location Card (from JSON)
+    if (config.location || config.contact) {
+        html += `<section class="info-card location-card">`;
+
+        if (config.location?.address) {
+            html += `<h3 class="location-address">${escapeHTML(config.location.address)}</h3>`;
+        }
+
+        if (config.contact) {
+            if (config.contact.phone) {
+                html += `
+                    <a href="tel:${config.contact.phone.replace(/\s/g, '')}" class="contact-row">
+                        <span>📞</span> ${escapeHTML(config.contact.phone)}
+                    </a>
+                `;
+            }
+            if (config.contact.email) {
+                html += `
+                    <a href="mailto:${config.contact.email}" class="contact-row">
+                        <span>✉️</span> ${escapeHTML(config.contact.email)}
+                    </a>
+                `;
+            }
+        }
+
+        if (config.location?.mapUrl) {
+            const mapLabel = lang === 'it' ? 'Vedi su Mappa' : 'View on Map';
+            html += `
+                <a href="${config.location.mapUrl}" target="_blank" class="map-embed">
+                    🗺️ ${mapLabel}
+                </a>
+            `;
+        }
+        html += `</section>`;
+    }
+
+    // 2. Content Items (texts and CTAs in CSV order)
+    data.contentItems.forEach(item => {
+        if (item.type === 'text') {
+            const label = lang === 'it' ? item.label_it : item.label_en;
+            const text = lang === 'it' ? item.text_it : item.text_en;
+            const isCard = item.style === 'card';
+            html += `
+                <section class="info-section ${isCard ? 'info-section-card' : 'info-section-plain'}">
+                    ${label ? `<h2 class="info-title">${escapeHTML(label)}</h2>` : ''}
+                    <p class="info-text">${escapeHTML(text)}</p>
+                </section>
+            `;
+        } else if (item.type === 'cta') {
+            const label = lang === 'it' ? item.label_it : item.label_en;
+            const isPrimary = item.style === 'primary';
+            html += `
+                <a href="${item.link}" class="cta-btn ${isPrimary ? 'primary' : 'secondary'}">
+                    ${escapeHTML(label)}
+                </a>
+            `;
+        }
+    });
+
+    // 3. Timetables (from CSV - localized)
+    const hoursLocationTitle = lang === 'it' ? 'Orari Apertura' : 'Opening Hours';
+    const hoursKitchenTitle = lang === 'it' ? 'Orari Cucina' : 'Kitchen Hours';
+
+    if (data.hoursLocation.length > 0 || data.hoursKitchen.length > 0) {
+        html += `<section class="info-card">`;
+
+        if (data.hoursLocation.length > 0) {
+            html += `<h3 class="info-title">${hoursLocationTitle}</h3><div class="timetable-grid">`;
+            data.hoursLocation.forEach(h => {
+                const days = lang === 'it' ? h.days_it : h.days_en;
+                const times = h.slot2 ? `${h.slot1} / ${h.slot2}` : h.slot1;
+                html += `
+                    <div class="time-row">
+                        <span class="time-days">${escapeHTML(days)}</span>
+                        <span class="time-hours">${escapeHTML(times)}</span>
+                    </div>`;
+            });
+            html += `</div>`;
+        }
+
+        if (data.hoursKitchen.length > 0) {
+            const marginTop = data.hoursLocation.length > 0 ? 'margin-top: 16px;' : '';
+            html += `<h3 class="info-title" style="${marginTop}">${hoursKitchenTitle}</h3><div class="timetable-grid">`;
+            data.hoursKitchen.forEach(h => {
+                const days = lang === 'it' ? h.days_it : h.days_en;
+                const times = h.slot2 ? `${h.slot1} / ${h.slot2}` : h.slot1;
+                html += `
+                    <div class="time-row">
+                        <span class="time-days">${escapeHTML(days)}</span>
+                        <span class="time-hours">${escapeHTML(times)}</span>
+                    </div>`;
+            });
+            html += `</div>`;
+        }
+        html += `</section>`;
+    }
+
+    // 5. Socials (from JSON)
+    const socialLinks = config.contact?.socials || [];
+    if (socialLinks.length > 0) {
+        html += `<div class="social-grid">`;
+        socialLinks.forEach(soc => {
+            html += `
+                <a href="${soc.url}" target="_blank" class="social-link">
+                    <span>${soc.icon || '🔗'}</span> ${escapeHTML(soc.name)}
+                </a>
+            `;
+        });
+        html += `</div>`;
+    }
+
+    elements.infoContainer.innerHTML = html;
 }
 
 function renderAllergens(list) {
@@ -707,10 +1070,27 @@ function switchTab(newTab) {
 
     state.currentTab = newTab;
 
+    // Announce page change for screen readers
+    const tabNames = {
+        cuisine: { it: 'Menu Cucina', en: 'Kitchen Menu' },
+        bar: { it: 'Menu Bar', en: 'Bar Menu' },
+        info: { it: 'Informazioni', en: 'Information' }
+    };
+    const announceName = tabNames[newTab]?.[state.currentLanguage] || newTab;
+    announceToSR(announceName);
+
     if (state.data[newTab]) {
         render();
+        // Scroll to top of content
+        window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
-        elements.menuContainer.hidden = true;
+        if (newTab === 'info') {
+            elements.menuContainer.hidden = true;
+            elements.infoContainer.hidden = true; // wait for data
+        } else {
+            elements.infoContainer.hidden = true;
+            elements.menuContainer.hidden = true;
+        }
         elements.loadingState.hidden = false;
         fetchData(newTab);
     }
@@ -772,8 +1152,10 @@ function init() {
     updateUILanguage();
     updateActiveFilterDisplay();
 
-    // Fetch data
-    fetchData('cuisine');
+    // Fetch config first, then data
+    loadConfig().then(() => {
+        fetchData('cuisine');
+    });
 
     // Smart refresh on visibility change
     document.addEventListener('visibilitychange', () => {
