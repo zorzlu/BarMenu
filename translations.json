@@ -21,6 +21,7 @@
         "switchLang": "Passa a Inglese",
         "allergensExcluded": "allergeni esclusi",
         "contacts": "Contatti",
+        "welcomeMessage": "Benvenuti!",
         "allergens": {
             "glutine": "Glutine",
             "crostacei": "Crostacei",
@@ -60,6 +61,7 @@
         "switchLang": "Switch to Italian",
         "allergensExcluded": "allergens excluded",
         "contacts": "Contacts",
+        "welcomeMessage": "Welcome!",
         "allergens": {
             "glutine": "Gluten",
             "crostacei": "Shellfish",

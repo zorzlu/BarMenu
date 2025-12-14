@@ -108,29 +108,28 @@ body {
 }
 
 /* ========================================
-   Welcome Hero (Background Layer)
+   Welcome Hero (Background layer, fills screen)
    ======================================== */
 .welcome-hero {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--header-hero-height);
-    background: linear-gradient(135deg, var(--md-sys-color-secondary-container), var(--md-sys-color-primary-container));
+    bottom: 0;
+    background: var(--md-sys-color-surface-container);
     z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-md);
-    padding-top: calc(var(--spacing-md) + var(--sa-top));
+    padding-top: calc(var(--header-height) + var(--sa-top));
 }
 
-.welcome-hero.hidden {
+.welcome-hero.hidden .welcome-hero-content {
     display: none;
 }
 
 .welcome-hero-content {
     max-width: var(--max-width);
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--spacing-lg);
     text-align: center;
     color: var(--md-sys-color-on-primary-container);
 }
@@ -157,24 +156,24 @@ body {
 }
 
 /* ========================================
-   App Container (Floating Above Hero)
+   App Container (Floating IN FRONT of Hero)
    ======================================== */
 .app-container {
     position: relative;
     z-index: 10;
     min-height: 100vh;
     background-color: var(--color-bg);
-    margin-top: var(--header-hero-height);
+    margin-top: calc(var(--header-height) + var(--header-hero-height) + var(--sa-top));
     transition: margin-top 0.3s ease;
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
     border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-    padding-top: calc(var(--header-height) + var(--filter-bar-height) + var(--sa-top));
+    padding-top: var(--filter-bar-height);
     padding-bottom: calc(var(--bottom-nav-height) + var(--sa-bottom));
 }
 
-/* Collapsed state - app covers hero */
+/* Collapsed state - app stops at header bar (doesn't cover it) */
 .app-container.collapsed {
-    margin-top: 0;
+    margin-top: calc(var(--header-height) + var(--sa-top));
 }
 
 /* Screen Reader Only */
@@ -202,21 +201,18 @@ button:focus-visible {
 }
 
 /* ========================================
-   Header Styles
+   Header Styles (fixed on top, above everything)
    ======================================== */
 .header {
-    position: sticky;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
+    width: 100%;
     height: auto;
-    background: color-mix(in srgb, var(--color-surface) 95%, transparent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 0.5px solid var(--color-border);
+    background: var(--md-sys-color-surface-container);
     z-index: 100;
     padding-top: var(--sa-top);
-    margin-top: calc(-1 * (var(--header-height) + var(--filter-bar-height) + var(--sa-top)));
 }
 
 .header-content {
@@ -301,8 +297,8 @@ button:focus-visible {
     transition: transform 0.3s ease;
 }
 
-/* Rotate icon when collapsed */
-.app-container.collapsed .collapse-icon {
+/* Rotate icon when collapsed (uses aria-expanded attribute) */
+.header-collapse-toggle[aria-expanded="false"] .collapse-icon {
     transform: rotate(180deg);
 }
 
@@ -342,7 +338,7 @@ button:focus-visible {
 }
 
 /* ========================================
-   Filter Bar (Compact)
+   Filter Bar (Compact, sticks below header)
    ======================================== */
 .filter-bar {
     position: sticky;
@@ -354,7 +350,7 @@ button:focus-visible {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 0.5px solid var(--color-border);
-    z-index: 99;
+    z-index: 50;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -362,6 +358,7 @@ button:focus-visible {
     max-width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    margin-top: calc(-1 * var(--filter-bar-height));
 }
 
 .filter-bar[hidden] {

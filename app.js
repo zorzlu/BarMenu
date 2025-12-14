@@ -602,10 +602,9 @@ function render() {
     elements.loadingState.hidden = true;
 
     if (tab === 'info') {
-        // Hide filter bar and hero on Info tab
+        // Hide filter bar on Info tab (but show hero)
         document.querySelector('.filter-bar').hidden = true;
-        elements.welcomeHero.classList.add('hidden');
-        elements.appContainer.classList.add('collapsed');
+        updateHeroContent();
         renderInfoPage();
         elements.menuContainer.hidden = true;
         elements.infoContainer.hidden = false;
@@ -1012,11 +1011,9 @@ function announceToSR(message) {
 // ========================================
 
 const SCROLL_THRESHOLD = 50; // Pixels to scroll before collapsing
-const FORCE_EXPAND_THRESHOLD = 30; // Upward scroll momentum to force expand
+let isInitialized = false; // Flag to prevent collapse during page load
 
-function setHeaderExpanded(expanded) {
-    if (state.headerExpanded === expanded) return;
-
+function setHeaderExpanded(expanded, scrollToTop = false) {
     state.headerExpanded = expanded;
 
     if (expanded) {
@@ -1027,37 +1024,29 @@ function setHeaderExpanded(expanded) {
 
     // Update aria-expanded
     elements.headerCollapseToggle.setAttribute('aria-expanded', String(expanded));
+
+    // Scroll to top if requested (when expanding via button)
+    if (scrollToTop && expanded) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 function toggleHeader() {
-    setHeaderExpanded(!state.headerExpanded);
+    const newState = !state.headerExpanded;
+    // When expanding, also scroll to top so user can see the content
+    setHeaderExpanded(newState, newState);
 }
 
 function updateHeroContent() {
-    const tab = state.currentTab;
-    const infoData = state.data.info;
     const config = state.config;
 
-    // Hide hero on info tab
-    if (tab === 'info') {
-        elements.welcomeHero.classList.add('hidden');
-        elements.appContainer.classList.add('collapsed');
-        return;
-    }
-
-    // Show welcome hero with app name and welcome message
-    // Use app config for the title, and menu header for the text
+    // Show welcome hero with static app name from config (same for ALL pages)
     const appName = config?.app?.name || 'Benvenuto';
     const logoUrl = config?.app?.logoUrl;
 
-    // Get welcome text from info data if available
-    const header = tab === 'cuisine' ? infoData?.menuHeaderCuisine : infoData?.menuHeaderBar;
-    const lang = state.currentLanguage;
-    const welcomeText = header ? (lang === 'it' ? header.text_it : header.text_en) : '';
-
-    // Update hero content
+    // Update hero content - static, same for all pages including info
     elements.heroTitle.textContent = appName;
-    elements.heroText.textContent = welcomeText || '';
+    // heroText uses data-i18n="welcomeMessage", will be updated by updateUILanguage()
 
     // Show hero logo if available
     if (logoUrl) {
@@ -1069,38 +1058,54 @@ function updateHeroContent() {
 
     elements.welcomeHero.classList.remove('hidden');
 
-    // Ensure app container shows the hero when expanded
+    // Apply current expanded/collapsed state (persist across tabs)
     if (state.headerExpanded) {
         elements.appContainer.classList.remove('collapsed');
+    } else {
+        elements.appContainer.classList.add('collapsed');
     }
 }
 
 function handleScroll() {
+    // Don't process scroll during initialization
+    if (!isInitialized) return;
+
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - state.lastScrollY;
-
-    // Only process scroll on menu tabs (not info)
-    if (state.currentTab === 'info') {
-        state.lastScrollY = currentScrollY;
-        return;
-    }
 
     // Scrolling down - collapse header
     if (scrollDelta > 0 && currentScrollY > SCROLL_THRESHOLD && state.headerExpanded) {
         setHeaderExpanded(false);
     }
 
-    // At top of page - always expand
-    if (currentScrollY <= 5) {
-        setHeaderExpanded(true);
-    }
-
-    // Force-scroll up (fast upward scroll) - expand
-    if (scrollDelta < -FORCE_EXPAND_THRESHOLD && !state.headerExpanded) {
-        setHeaderExpanded(true);
-    }
-
     state.lastScrollY = currentScrollY;
+}
+
+// Handle wheel event for overscroll expand (when already at top)
+function handleWheel(e) {
+    // Only trigger if at top, scrolling up (negative deltaY), and collapsed
+    if (window.scrollY <= 0 && e.deltaY < 0 && !state.headerExpanded) {
+        setHeaderExpanded(true, true);
+    }
+}
+
+// Handle touch events for mobile overscroll expand
+let touchStartY = 0;
+function handleTouchStart(e) {
+    touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchMove(e) {
+    // Only trigger if at top, swiping down, and collapsed
+    if (window.scrollY <= 0 && !state.headerExpanded) {
+        const touchY = e.touches[0].clientY;
+        const deltaY = touchY - touchStartY;
+        // Swiping down (positive deltaY = finger moving down = scroll up gesture)
+        if (deltaY > 30) {
+            setHeaderExpanded(true, true);
+            touchStartY = touchY; // Reset to prevent repeated triggers
+        }
+    }
 }
 
 // ========================================
@@ -1128,9 +1133,8 @@ function switchTab(newTab) {
 
     if (state.data[newTab]) {
         render();
-        // Scroll to top of content and expand header
+        // Scroll to top of content (header state persists)
         window.scrollTo({ top: 0, behavior: 'instant' });
-        setHeaderExpanded(true);
     } else {
         if (newTab === 'info') {
             elements.menuContainer.hidden = true;
@@ -1206,14 +1210,18 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
+// Wheel handler for overscroll expand (when already at top)
+window.addEventListener('wheel', handleWheel, { passive: true });
+
+// Touch handlers for mobile overscroll expand
+window.addEventListener('touchstart', handleTouchStart, { passive: true });
+window.addEventListener('touchmove', handleTouchMove, { passive: true });
+
 // ========================================
 // Init
 // ========================================
 
 async function init() {
-    // Scroll to top on page load
-    window.scrollTo({ top: 0, behavior: 'instant' });
-
     try {
         // Load translations and config first
         await loadTranslations();
@@ -1234,6 +1242,13 @@ async function init() {
         render();
         elements.loadingState.hidden = true;
         elements.errorBanner.hidden = true;
+
+        // Scroll to top after render (with small delay for reliability)
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            // Mark initialization complete - allow scroll handlers to work
+            isInitialized = true;
+        });
 
     } catch (e) {
         console.error('Initialization error:', e);

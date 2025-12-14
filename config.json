@@ -3,7 +3,7 @@
         "name": "Il Tuo Bar",
         "logoUrl": "",
         "accentColor": "#63A002",
-        "theme": "light",
+        "theme": "dark",
         "fontFamily": "Inter, sans-serif"
     },
     "regional": {
