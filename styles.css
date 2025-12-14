@@ -63,6 +63,7 @@
     /* Layout */
     --max-width: 600px;
     --header-height: 56px;
+    --header-hero-height: 100px;
     --filter-bar-height: 48px;
     --bottom-nav-height: 72px;
     --border-radius: 12px;
@@ -101,8 +102,79 @@ body {
     color: var(--color-primary);
     background-color: var(--color-bg);
     min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* ========================================
+   Welcome Hero (Background Layer)
+   ======================================== */
+.welcome-hero {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-hero-height);
+    background: linear-gradient(135deg, var(--md-sys-color-secondary-container), var(--md-sys-color-primary-container));
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    padding-top: calc(var(--spacing-md) + var(--sa-top));
+}
+
+.welcome-hero.hidden {
+    display: none;
+}
+
+.welcome-hero-content {
+    max-width: var(--max-width);
+    text-align: center;
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.hero-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    object-fit: cover;
+    margin-bottom: var(--spacing-sm);
+}
+
+.hero-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+
+.hero-text {
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* ========================================
+   App Container (Floating Above Hero)
+   ======================================== */
+.app-container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    background-color: var(--color-bg);
+    margin-top: var(--header-hero-height);
+    transition: margin-top 0.3s ease;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
     padding-top: calc(var(--header-height) + var(--filter-bar-height) + var(--sa-top));
     padding-bottom: calc(var(--bottom-nav-height) + var(--sa-bottom));
+}
+
+/* Collapsed state - app covers hero */
+.app-container.collapsed {
+    margin-top: 0;
 }
 
 /* Screen Reader Only */
@@ -133,17 +205,18 @@ button:focus-visible {
    Header Styles
    ======================================== */
 .header {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
-    height: calc(var(--header-height) + var(--sa-top));
+    height: auto;
     background: color-mix(in srgb, var(--color-surface) 95%, transparent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 0.5px solid var(--color-border);
-    z-index: 1000;
+    z-index: 100;
     padding-top: var(--sa-top);
+    margin-top: calc(-1 * (var(--header-height) + var(--filter-bar-height) + var(--sa-top)));
 }
 
 .header-content {
@@ -153,7 +226,7 @@ button:focus-visible {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 100%;
+    height: var(--header-height);
 }
 
 .bar-name {
@@ -197,6 +270,42 @@ button:focus-visible {
     transform: scale(0.95);
 }
 
+/* Header Collapse Toggle Button */
+.header-collapse-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--color-bg);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.header-collapse-toggle:hover {
+    background: var(--color-separator);
+}
+
+.header-collapse-toggle:active {
+    transform: scale(0.9);
+}
+
+.collapse-icon {
+    font-family: 'FluentIcons';
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--color-secondary);
+    transition: transform 0.3s ease;
+}
+
+/* Rotate icon when collapsed */
+.app-container.collapsed .collapse-icon {
+    transform: rotate(180deg);
+}
+
 /* Update Indicator */
 .update-indicator {
     position: absolute;
@@ -236,7 +345,7 @@ button:focus-visible {
    Filter Bar (Compact)
    ======================================== */
 .filter-bar {
-    position: fixed;
+    position: sticky;
     top: calc(var(--header-height) + var(--sa-top));
     left: 0;
     right: 0;
@@ -245,7 +354,7 @@ button:focus-visible {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 0.5px solid var(--color-border);
-    z-index: 999;
+    z-index: 99;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -919,10 +1028,8 @@ button:focus-visible {
 
 /* Desktop Enhancements */
 @media (min-width: 768px) {
-    body {
-        /* background-color: #eef2f5; - Removed to prevent theme override on resize */
-    }
 
+    /* Note: Body background color removed to prevent theme override on resize */
     .modal {
         border-radius: var(--border-radius-lg);
         max-height: 70vh;

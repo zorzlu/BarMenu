@@ -78,7 +78,9 @@ let state = {
     tempFilters: {
         diet: 'all',
         excludeAllergens: []
-    }
+    },
+    headerExpanded: true,
+    lastScrollY: 0
 };
 
 // ========================================
@@ -98,6 +100,15 @@ const elements = {
     storeLogo: document.getElementById('storeLogo'),
     storeName: document.getElementById('storeName'),
     navItems: document.querySelectorAll('.nav-item'),
+    // Welcome hero elements (background layer)
+    welcomeHero: document.getElementById('welcomeHero'),
+    heroLogo: document.getElementById('heroLogo'),
+    heroTitle: document.getElementById('heroTitle'),
+    heroText: document.getElementById('heroText'),
+    // App container (floating above hero)
+    appContainer: document.getElementById('appContainer'),
+    mainHeader: document.getElementById('mainHeader'),
+    headerCollapseToggle: document.getElementById('headerCollapseToggle'),
     // Filter elements
     filterTrigger: document.getElementById('filterTrigger'),
     activeFilters: document.getElementById('activeFilters'),
@@ -591,8 +602,10 @@ function render() {
     elements.loadingState.hidden = true;
 
     if (tab === 'info') {
-        // Hide filter bar on Info tab
+        // Hide filter bar and hero on Info tab
         document.querySelector('.filter-bar').hidden = true;
+        elements.welcomeHero.classList.add('hidden');
+        elements.appContainer.classList.add('collapsed');
         renderInfoPage();
         elements.menuContainer.hidden = true;
         elements.infoContainer.hidden = false;
@@ -602,6 +615,9 @@ function render() {
 
     // Show filter bar on menu tabs
     document.querySelector('.filter-bar').hidden = false;
+
+    // Update collapsible header hero content
+    updateHeroContent();
 
     elements.infoContainer.hidden = true;
     const filteredCategories = applyFiltersToData(data.categories);
@@ -618,7 +634,7 @@ function render() {
     const lang = state.currentLanguage;
     let html = '';
 
-    // Menu header (if available from info.csv)
+    // Menu header card (if available from info.csv) - displayed inline in menu
     const infoData = state.data.info;
     if (infoData) {
         const header = tab === 'cuisine' ? infoData.menuHeaderCuisine : infoData.menuHeaderBar;
@@ -992,6 +1008,102 @@ function announceToSR(message) {
 }
 
 // ========================================
+// Collapsible Header (Parallax Hero)
+// ========================================
+
+const SCROLL_THRESHOLD = 50; // Pixels to scroll before collapsing
+const FORCE_EXPAND_THRESHOLD = 30; // Upward scroll momentum to force expand
+
+function setHeaderExpanded(expanded) {
+    if (state.headerExpanded === expanded) return;
+
+    state.headerExpanded = expanded;
+
+    if (expanded) {
+        elements.appContainer.classList.remove('collapsed');
+    } else {
+        elements.appContainer.classList.add('collapsed');
+    }
+
+    // Update aria-expanded
+    elements.headerCollapseToggle.setAttribute('aria-expanded', String(expanded));
+}
+
+function toggleHeader() {
+    setHeaderExpanded(!state.headerExpanded);
+}
+
+function updateHeroContent() {
+    const tab = state.currentTab;
+    const infoData = state.data.info;
+    const config = state.config;
+
+    // Hide hero on info tab
+    if (tab === 'info') {
+        elements.welcomeHero.classList.add('hidden');
+        elements.appContainer.classList.add('collapsed');
+        return;
+    }
+
+    // Show welcome hero with app name and welcome message
+    // Use app config for the title, and menu header for the text
+    const appName = config?.app?.name || 'Benvenuto';
+    const logoUrl = config?.app?.logoUrl;
+
+    // Get welcome text from info data if available
+    const header = tab === 'cuisine' ? infoData?.menuHeaderCuisine : infoData?.menuHeaderBar;
+    const lang = state.currentLanguage;
+    const welcomeText = header ? (lang === 'it' ? header.text_it : header.text_en) : '';
+
+    // Update hero content
+    elements.heroTitle.textContent = appName;
+    elements.heroText.textContent = welcomeText || '';
+
+    // Show hero logo if available
+    if (logoUrl) {
+        elements.heroLogo.src = logoUrl;
+        elements.heroLogo.hidden = false;
+    } else {
+        elements.heroLogo.hidden = true;
+    }
+
+    elements.welcomeHero.classList.remove('hidden');
+
+    // Ensure app container shows the hero when expanded
+    if (state.headerExpanded) {
+        elements.appContainer.classList.remove('collapsed');
+    }
+}
+
+function handleScroll() {
+    const currentScrollY = window.scrollY;
+    const scrollDelta = currentScrollY - state.lastScrollY;
+
+    // Only process scroll on menu tabs (not info)
+    if (state.currentTab === 'info') {
+        state.lastScrollY = currentScrollY;
+        return;
+    }
+
+    // Scrolling down - collapse header
+    if (scrollDelta > 0 && currentScrollY > SCROLL_THRESHOLD && state.headerExpanded) {
+        setHeaderExpanded(false);
+    }
+
+    // At top of page - always expand
+    if (currentScrollY <= 5) {
+        setHeaderExpanded(true);
+    }
+
+    // Force-scroll up (fast upward scroll) - expand
+    if (scrollDelta < -FORCE_EXPAND_THRESHOLD && !state.headerExpanded) {
+        setHeaderExpanded(true);
+    }
+
+    state.lastScrollY = currentScrollY;
+}
+
+// ========================================
 // Events
 // ========================================
 
@@ -1016,8 +1128,9 @@ function switchTab(newTab) {
 
     if (state.data[newTab]) {
         render();
-        // Scroll to top of content
+        // Scroll to top of content and expand header
         window.scrollTo({ top: 0, behavior: 'instant' });
+        setHeaderExpanded(true);
     } else {
         if (newTab === 'info') {
             elements.menuContainer.hidden = true;
@@ -1077,6 +1190,21 @@ document.addEventListener('keydown', (e) => {
         closeFilterModal();
     }
 });
+
+// Header collapse toggle
+elements.headerCollapseToggle.addEventListener('click', toggleHeader);
+
+// Scroll handler for header collapse (throttled)
+let scrollTicking = false;
+window.addEventListener('scroll', () => {
+    if (!scrollTicking) {
+        requestAnimationFrame(() => {
+            handleScroll();
+            scrollTicking = false;
+        });
+        scrollTicking = true;
+    }
+}, { passive: true });
 
 // ========================================
 // Init
