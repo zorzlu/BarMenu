@@ -240,7 +240,7 @@ button:focus-visible {
 
 .last-updated {
     font-size: var(--font-size-xs);
-    color: var(--color-tertiary);
+    color: var(--color-secondary);
     font-variant-numeric: tabular-nums;
 }
 
@@ -537,14 +537,14 @@ button:focus-visible {
 
 .filter-section-desc {
     font-size: var(--font-size-xs);
-    color: var(--color-tertiary);
+    color: var(--color-secondary);
     margin-bottom: var(--spacing-md);
 }
 
 /* Diet Segmented Control */
 .diet-segmented {
     display: flex;
-    background: var(--color-bg-segmented);
+    background: var(--md-sys-color-surface-container-high);
     border-radius: 10px;
     padding: 4px;
     gap: 4px;
@@ -620,8 +620,10 @@ button:focus-visible {
 }
 
 .allergen-checkbox.checked {
-    background: var(--color-tertiary-container);
-    border-color: var(--color-tertiary);
+    background: var(--md-sys-color-tertiary-container);
+    border-color: var(--md-sys-color-tertiary);
+    /* Ensure noticeable fill */
+    background-color: color-mix(in srgb, var(--md-sys-color-tertiary-container), var(--md-sys-color-tertiary) 20%);
 }
 
 .allergen-checkbox input[type="checkbox"] {
@@ -674,7 +676,10 @@ button:focus-visible {
 
 .modal-btn.secondary {
     background: var(--color-bg);
-    color: var(--color-secondary);
+    color: var(--color-primary);
+    /* Stronger text color */
+    border: 1px solid var(--color-separator);
+    /* Add border for definition */
 }
 
 .modal-btn.secondary:hover {
@@ -709,43 +714,74 @@ button:focus-visible {
     bottom: 0;
     left: 0;
     right: 0;
-    height: calc(var(--bottom-nav-height) + var(--sa-bottom));
-    background: color-mix(in srgb, var(--color-surface) 95%, transparent);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 0.5px solid var(--color-border);
+    height: 80px;
+    /* M3 Standard Height */
+    padding-bottom: var(--sa-bottom);
+    /* Safe area adds to height if needed, or included in height calculation */
+    background: var(--md-sys-color-surface-container);
+    /* M3 Surface Container */
+    /* Remove blur/transparency for solid M3 feel, or keep refined if requested. Plan said Surface Container. */
+    border-top: none;
+    /* M3 relies on elevation/color diff */
     display: flex;
     justify-content: center;
-    padding-bottom: var(--sa-bottom);
+    align-items: center;
+    /* Center vertically */
     z-index: 1000;
+    box-sizing: content-box;
+    height: calc(80px + var(--sa-bottom));
+    padding-bottom: var(--sa-bottom);
 }
 
 .nav-item {
     flex: 1;
     max-width: 120px;
+    /* M3 Spec */
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    /* Center content vertically */
     gap: 4px;
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--color-tertiary);
+    color: var(--md-sys-color-on-surface-variant);
+    /* Inactive Color */
+    padding: 0;
 }
 
 .nav-icon {
     position: relative;
-    width: 24px;
-    height: 24px;
+    width: 64px;
+    /* M3 Pill Width */
+    height: 32px;
+    /* M3 Pill Height */
+    border-radius: 16px;
+    /* Stadium Shape */
+    display: flex;
+    /* Centering for icon inside pill */
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, width 0.2s ease;
+}
+
+/* Nav Icon Inner Sizing */
+.nav-icon .icon-regular,
+.nav-icon .icon-filled {
+    font-size: 24px;
 }
 
 /* Fluent icon base styles for nav icons */
 .nav-icon .icon-regular,
 .nav-icon .icon-filled {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Properly center absolute icons */
+    left: 50%;
     font-family: 'FluentIcons';
     font-size: 24px;
     line-height: 1;
@@ -772,12 +808,33 @@ button:focus-visible {
 }
 
 .nav-label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    /* ~12px M3 Label */
     font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.5px;
+    transition: color 0.2s ease;
 }
 
+/* Active State Styles */
 .nav-item.active {
-    color: var(--color-accent);
+    color: var(--md-sys-color-on-surface);
+    /* Active Label Color */
+}
+
+.nav-item.active .nav-label {
+    font-weight: 700;
+}
+
+.nav-item.active .nav-icon {
+    background-color: var(--md-sys-color-secondary-container);
+    /* Active Pill Color */
+    color: var(--md-sys-color-on-secondary-container);
+    /* Active Icon Color */
+}
+
+.nav-item.active .icon-filled {
+    color: var(--md-sys-color-on-secondary-container);
 }
 
 /* ========================================
