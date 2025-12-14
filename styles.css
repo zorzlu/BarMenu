@@ -168,7 +168,8 @@ body {
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.15);
     border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
     padding-top: var(--filter-bar-height);
-    padding-bottom: calc(var(--bottom-nav-height) + var(--sa-bottom));
+    padding-bottom: calc(80px + 32px + var(--sa-bottom));
+    /* Ensure content clears floating nav */
 }
 
 /* Collapsed state - app stops at header bar (doesn't cover it) */
@@ -711,26 +712,34 @@ button:focus-visible {
    ======================================== */
 .bottom-nav {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: calc(16px + var(--sa-bottom));
+    /* Float above safe area */
+    left: 50%;
+    transform: translateX(-50%);
+    /* Center horizontally */
+    width: calc(100% - 32px);
+    /* Full width minus margins */
+    max-width: 400px;
+    /* Cap width on large screens */
     height: 80px;
     /* M3 Standard Height */
-    padding-bottom: var(--sa-bottom);
-    /* Safe area adds to height if needed, or included in height calculation */
-    background: var(--md-sys-color-surface-container);
-    /* M3 Surface Container */
-    /* Remove blur/transparency for solid M3 feel, or keep refined if requested. Plan said Surface Container. */
+    background: var(--md-sys-color-surface-container-high);
+    /* M3 Surface Container High for emphasis */
+    border-radius: 50px;
+    /* Pill Shape */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    /* Elevation */
     border-top: none;
-    /* M3 relies on elevation/color diff */
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
+    /* Distribute items evenly in pill */
     align-items: center;
     /* Center vertically */
     z-index: 1000;
-    box-sizing: content-box;
-    height: calc(80px + var(--sa-bottom));
-    padding-bottom: var(--sa-bottom);
+    box-sizing: border-box;
+    /* Include padding in height if used */
+    padding: 0 16px;
+    /* Horizontal padding for items */
 }
 
 .nav-item {
@@ -827,14 +836,14 @@ button:focus-visible {
 }
 
 .nav-item.active .nav-icon {
-    background-color: var(--md-sys-color-secondary-container);
-    /* Active Pill Color */
-    color: var(--md-sys-color-on-secondary-container);
-    /* Active Icon Color */
+    background-color: var(--md-sys-color-primary-container);
+    /* Active Pill Color (Primary) */
+    color: var(--md-sys-color-on-primary-container);
+    /* Active Icon Color (On Primary) */
 }
 
 .nav-item.active .icon-filled {
-    color: var(--md-sys-color-on-secondary-container);
+    color: var(--md-sys-color-on-primary-container);
 }
 
 /* ========================================
