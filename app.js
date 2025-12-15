@@ -102,9 +102,12 @@ const elements = {
     navItems: document.querySelectorAll('.nav-item'),
     // Welcome hero elements (background layer)
     welcomeHero: document.getElementById('welcomeHero'),
+    welcomeHeroContent: document.querySelector('.welcome-hero-content'),
     heroLogo: document.getElementById('heroLogo'),
     heroTitle: document.getElementById('heroTitle'),
+    heroClaim: document.getElementById('heroClaim'),
     heroText: document.getElementById('heroText'),
+    kitchenStatus: document.getElementById('kitchenStatus'),
     // App container (floating above hero)
     appContainer: document.getElementById('appContainer'),
     mainHeader: document.getElementById('mainHeader'),
@@ -121,6 +124,7 @@ const elements = {
     dietOptions: document.querySelectorAll('.diet-option'),
     allergenGrid: document.getElementById('allergenGrid'),
     clearFilters: document.getElementById('clearFilters'),
+    inlineClearFilters: document.getElementById('inlineClearFilters'),
     applyFilters: document.getElementById('applyFilters'),
     // Accessibility
     srAnnounce: document.getElementById('srAnnounce')
@@ -584,14 +588,7 @@ async function fetchData(tab, isRefresh = true) {
 function render() {
     const tab = state.currentTab;
     const data = state.data[tab];
-
-    if (data && data.lastSheetUpdate) {
-        elements.lastUpdated.textContent = data.lastSheetUpdate;
-    } else if (state.lastFetch[tab]) {
-        elements.lastUpdated.textContent = state.lastFetch[tab].toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-    } else {
-        elements.lastUpdated.textContent = '--:--';
-    }
+    // Last updated logic removed
 
     if (!data) {
         elements.menuContainer.hidden = true;
@@ -736,6 +733,8 @@ function renderInfoPage() {
             `;
         }
     });
+
+    html += `<div _ngcontent-hlg-c24="" class="squiggle"><svg _ngcontent-hlg-c24="" aria-hidden="true" width="100%" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><pattern _ngcontent-hlg-c24="" id="a" width="91" height="8" patternUnits="userSpaceOnUse"><g _ngcontent-hlg-c24="" clip-path="url(#clip0_2426_11367)"><path _ngcontent-hlg-c24="" d="M114 4c-5.067 4.667-10.133 4.667-15.2 0S88.667-.667 83.6 4 73.467 8.667 68.4 4 58.267-.667 53.2 4 43.067 8.667 38 4 27.867-.667 22.8 4 12.667 8.667 7.6 4-2.533-.667-7.6 4s-10.133 4.667-15.2 0S-32.933-.667-38 4s-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0" stroke="#E1E3E1" stroke-linecap="square"></path></g></pattern><rect _ngcontent-hlg-c24="" width="100%" height="100%" fill="url(#a)"></rect></svg></div>`;
 
     // 2. Timetables (from CSV - localized)
     const hoursLocationTitle = lang === 'it' ? 'Orari Apertura' : 'Opening Hours';
@@ -883,6 +882,11 @@ function updateActiveFilterDisplay() {
     // Update trigger button
     elements.filterTrigger.classList.toggle('has-filters', hasFilters);
 
+    // Update inline clear button visibility
+    if (elements.inlineClearFilters) {
+        elements.inlineClearFilters.hidden = !hasFilters;
+    }
+
     // Update active filters display
     elements.activeFilters.hidden = !hasFilters;
 
@@ -995,9 +999,17 @@ function applyFiltersFromModal() {
 }
 
 function clearAllFilters() {
+    // Clear temp filters (for modal)
     state.tempFilters.diet = 'all';
     state.tempFilters.excludeAllergens = [];
     syncModalToState();
+
+    // Also clear actual filters and re-render (for inline button use)
+    state.filters.diet = 'all';
+    state.filters.excludeAllergens = [];
+    updateActiveFilterDisplay();
+    render();
+    savePreferences();
 }
 
 function announceToSR(message) {
@@ -1048,7 +1060,10 @@ function updateHeroContent() {
     const logoUrl = config?.app?.logoUrl;
 
     // Update hero content - static, same for all pages including info
-    elements.heroTitle.textContent = appName;
+    // elements.heroTitle.textContent = appName; (Removed: element no longer exists)
+    if (elements.heroClaim && config?.app?.claim) {
+        elements.heroClaim.textContent = config.app.claim;
+    }
     // heroText uses data-i18n="welcomeMessage", will be updated by updateUILanguage()
 
     // Show hero logo if available
@@ -1067,6 +1082,9 @@ function updateHeroContent() {
     } else {
         elements.appContainer.classList.add('collapsed');
     }
+
+    // Update kitchen status card
+    updateKitchenStatus();
 }
 
 function handleScroll() {
@@ -1151,6 +1169,53 @@ function switchTab(newTab) {
     }
 }
 
+// ========================================
+// Kitchen Status Logic
+// ========================================
+
+function updateKitchenStatus() {
+    // openingHours is under config.app, not config directly
+    if (!state.config?.app?.openingHours || !elements.kitchenStatus) return;
+
+    const { open, close } = state.config.app.openingHours;
+    if (!open || !close) return;
+
+    const now = new Date();
+    const [openH, openM] = open.split(':').map(Number);
+    const [closeH, closeM] = close.split(':').map(Number);
+
+    const openTime = new Date(now);
+    openTime.setHours(openH, openM, 0);
+
+    const closeTime = new Date(now);
+    closeTime.setHours(closeH, closeM, 0);
+
+    // Handle case where close time is next day (e.g. 01:00)
+    if (closeTime < openTime) {
+        closeTime.setDate(closeTime.getDate() + 1);
+    }
+
+    let statusText = '';
+
+    // Calculate difference in minutes
+    const diffMs = openTime - now;
+    const diffMins = Math.ceil(diffMs / (1000 * 60));
+
+    if (now >= openTime && now < closeTime) {
+        // Kitchen Open
+        statusText = t('kitchenOpen');
+    } else if (diffMins > 0 && diffMins <= 30) {
+        // Opening Soon (< 30m)
+        statusText = t('kitchenOpensIn').replace('{minutes}', diffMins);
+    } else {
+        // Closed - use "opens tomorrow" key (generic)
+        statusText = t('kitchenOpensTomorrow').replace('{time}', open);
+    }
+
+    elements.kitchenStatus.textContent = statusText;
+    elements.kitchenStatus.hidden = false;
+}
+
 // Tab Navigation
 elements.navItems.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.target));
@@ -1173,6 +1238,9 @@ elements.filterTrigger.addEventListener('click', openFilterModal);
 elements.modalClose.addEventListener('click', closeFilterModal);
 elements.applyFilters.addEventListener('click', applyFiltersFromModal);
 elements.clearFilters.addEventListener('click', clearAllFilters);
+if (elements.inlineClearFilters) {
+    elements.inlineClearFilters.addEventListener('click', clearAllFilters);
+}
 
 // Diet options in modal
 elements.dietOptions.forEach(btn => {
@@ -1234,6 +1302,34 @@ async function init() {
         updateUILanguage();
         updateActiveFilterDisplay();
 
+        // Initialize kitchen status interval
+        updateKitchenStatus();
+        setInterval(updateKitchenStatus, 60000);
+
+        // --- DYNAMIC HERO HEIGHT OBSERVER ---
+        const heroObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                if (elements.welcomeHero) {
+                    const totalHeight = elements.welcomeHero.offsetHeight;
+                    // Set variable to Total Height minus header height approx (60px) to ensure calc work
+                    // Margin top = Header + HeroVar + SA
+                    // HeroElement = Header + SA + Content
+                    // Content = HeroElement - Header - SA
+                    // So we want HeroVar to be approx Content.
+                    const val = Math.max(0, totalHeight - 64);
+                    document.documentElement.style.setProperty('--header-hero-height', `${val}px`);
+                }
+            }
+        });
+        if (elements.welcomeHero) {
+            heroObserver.observe(elements.welcomeHero);
+            // Also observe content changes if possible, but hero outer height change covers it
+            if (elements.welcomeHeroContent) heroObserver.observe(elements.welcomeHeroContent);
+        }
+
+        // Initial load logic...
+        if (!state.currentTab) state.currentTab = 'cuisine';
+
         // Load all data in parallel, wait for all to complete
         await Promise.all([
             fetchData('cuisine', false),
@@ -1245,6 +1341,7 @@ async function init() {
         render();
         elements.loadingState.hidden = true;
         elements.errorBanner.hidden = true;
+
 
         // Scroll to top after render (with small delay for reliability)
         requestAnimationFrame(() => {

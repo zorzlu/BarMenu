@@ -24,101 +24,56 @@
                     aria-expanded="true">
                     <span class="collapse-icon">&#xf2b7;</span>
                 </button>
-                <span class="last-updated" id="lastUpdated" aria-live="polite">--:--</span>
                 <button class="lang-switch" id="langSwitch" aria-label="Switch to English">
                     <span class="lang-flag">🇬🇧</span>
                 </button>
             </div>
         </div>
-        <!-- Update indicator -->
-        <div class="update-indicator" id="updateIndicator" aria-live="polite">
-            <span class="update-dot"></span>
-            <span data-i18n="updated">Menu aggiornato</span>
-        </div>
+
     </header>
 
     <!-- Welcome Hero (background, z:1) - static content from config -->
     <div class="welcome-hero" id="welcomeHero">
         <div class="welcome-hero-content">
-            <img id="heroLogo" class="hero-logo" alt="Logo" hidden>
-            <h2 class="hero-title" id="heroTitle"></h2>
-            <p class="hero-text" id="heroText" data-i18n="welcomeMessage"></p>
+            <img id="heroLogo" class="hero-logo-big" src="iltuobarlogo.png" alt="Il Tuo Bar">
+            <!-- <h2 class="hero-title" id="heroTitle"></h2> -->
+            <p class="hero-claim" id="heroClaim"></p>
+            <div class="kitchen-status-card" id="kitchenStatus" hidden>
+                <!-- Status text injected via JS -->
+            </div>
+            <p class="hero-text" id="heroText" data-i18n="welcomeMessage" hidden></p>
         </div>
     </div>
 
     <!-- App Container (floats above hero with shadow, z:10) -->
     <div class="app-container" id="appContainer">
         <!-- Sticky Filter Bar -->
-        <section class="filter-bar" id="filterBar" role="search" aria-label="Filtri menu">
-            <button class="filter-trigger" id="filterTrigger" aria-expanded="false" aria-controls="filterModal">
-                <span class="filter-trigger-icon">🔽</span>
-                <span class="filter-trigger-label" data-i18n="filters">Filtri</span>
-            </button>
-            <!-- Active filter chips (shown when filters are active) -->
-            <div class="active-filters" id="activeFilters" hidden>
-                <span class="filter-chip diet-chip" id="dietChip" hidden>
+        <div class="filter-bar" id="filterBar" hidden>
+            <div class="filter-actions">
+                <button class="filter-trigger" id="filterTrigger" aria-label="Filtra menu">
+                    <span class="fluent-icon">&#xf412;</span> <!-- filter-24-regular -->
+                    <span data-i18n="filterBtn">Filtra</span>
+                </button>
+            </div>
+            <div class="active-filters no-scrollbar" id="activeFilters">
+                <!-- Filter chips injected here -->
+                <span class="filter-chip" id="dietChip" hidden>
                     <span class="chip-icon"></span>
                     <span class="chip-label"></span>
                 </span>
-                <span class="filter-chip allergen-chip-count" id="allergenChip" hidden>
+                <span class="filter-chip" id="allergenChip" hidden>
                     <span class="chip-icon">⚠️</span>
                     <span class="chip-label"></span>
                 </span>
             </div>
-        </section>
-
-        <!-- Unified Filter Modal -->
-        <div class="modal-overlay" id="filterModal" hidden>
-            <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
-                <div class="modal-header">
-                    <h2 id="modalTitle" data-i18n="filters">Filtri</h2>
-                    <button class="modal-close" id="modalClose" aria-label="Chiudi">✕</button>
-                </div>
-                <div class="modal-body">
-                    <!-- Diet Preferences Section -->
-                    <div class="filter-section">
-                        <h3 class="filter-section-title" data-i18n="dietPreferences">Preferenze Alimentari</h3>
-                        <div class="diet-segmented" role="radiogroup" aria-label="Preferenze alimentari">
-                            <button class="diet-option active" data-diet="all" role="radio" aria-checked="true">
-                                <span class="diet-icon">🍴</span>
-                                <span class="diet-label" data-i18n="dietAll">Tutti</span>
-                            </button>
-                            <button class="diet-option" data-diet="vegetarian" role="radio" aria-checked="false">
-                                <span class="diet-icon">🌿</span>
-                                <span class="diet-label" data-i18n="dietVegetarian">Vegetariano</span>
-                            </button>
-                            <button class="diet-option" data-diet="vegan" role="radio" aria-checked="false">
-                                <span class="diet-icon">🌱</span>
-                                <span class="diet-label" data-i18n="dietVegan">Vegano</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Allergen Exclusion Section -->
-                    <div class="filter-section">
-                        <h3 class="filter-section-title" data-i18n="excludeAllergens">Escludi Allergeni</h3>
-                        <p class="filter-section-desc" data-i18n="excludeAllergensDesc">I piatti con questi allergeni
-                            verranno nascosti.</p>
-                        <div class="allergen-grid" id="allergenGrid">
-                            <!-- Allergen checkboxes generated by JS -->
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="modal-btn secondary" id="clearFilters" data-i18n="clearAll">Cancella tutto</button>
-                    <button class="modal-btn primary" id="applyFilters" data-i18n="apply">Applica</button>
-                </div>
-            </div>
         </div>
+
+
 
         <!-- Screen Reader Announcements -->
         <div class="sr-only" aria-live="polite" id="srAnnounce"></div>
 
-        <!-- Error Banner -->
-        <div class="error-banner" id="errorBanner" role="alert" hidden>
-            <span class="error-message" data-i18n="errorMessage">Menu non disponibile.</span>
-            <button class="retry-button" id="retryButton" data-i18n="retry">Riprova</button>
-        </div>
+
 
         <!-- Main Content -->
         <main class="main-content" id="mainContent" role="main">
@@ -167,6 +122,65 @@
 
     <!-- Bottom Gradient Scrim -->
     <div class="bottom-scrim"></div>
+
+    <!-- Moved Elements for Layering -->
+    <!-- Unified Filter Modal -->
+    <div class="modal-overlay" id="filterModal" hidden>
+        <div class="modal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+            <div class="modal-header">
+                <h2 id="modalTitle" data-i18n="filters">Filtri</h2>
+                <button class="modal-close" id="modalClose" aria-label="Chiudi">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Diet Preferences Section -->
+                <div class="filter-section">
+                    <h3 class="filter-section-title" data-i18n="dietPreferences">Preferenze Alimentari</h3>
+                    <div class="diet-segmented" role="radiogroup" aria-label="Preferenze alimentari">
+                        <button class="diet-option active" data-diet="all" role="radio" aria-checked="true">
+                            <span class="diet-icon">🍴</span>
+                            <span class="diet-label" data-i18n="dietAll">Tutti</span>
+                        </button>
+                        <button class="diet-option" data-diet="vegetarian" role="radio" aria-checked="false">
+                            <span class="diet-icon">🌿</span>
+                            <span class="diet-label" data-i18n="dietVegetarian">Vegetariano</span>
+                        </button>
+                        <button class="diet-option" data-diet="vegan" role="radio" aria-checked="false">
+                            <span class="diet-icon">🌱</span>
+                            <span class="diet-label" data-i18n="dietVegan">Vegano</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Allergen Exclusion Section -->
+                <div class="filter-section">
+                    <h3 class="filter-section-title" data-i18n="excludeAllergens">Escludi Allergeni</h3>
+                    <p class="filter-section-desc" data-i18n="excludeAllergensDesc">I piatti con questi allergeni
+                        verranno nascosti.</p>
+                    <div class="allergen-grid" id="allergenGrid">
+                        <!-- Allergen checkboxes generated by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="clearFilters" data-i18n="clearAll">Cancella tutto</button>
+                <button class="modal-btn primary" id="applyFilters" data-i18n="apply">Applica</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" id="errorBanner" role="alert" hidden>
+        <span class="error-message" data-i18n="errorMessage">Menu non disponibile.</span>
+        <button class="retry-button" id="retryButton" data-i18n="retry">Riprova</button>
+    </div>
+
+    <!-- Update indicator -->
+    <div class="update-indicator" id="updateIndicator" aria-live="polite">
+        <span class="update-dot"></span>
+        <span data-i18n="updated">Menu aggiornato</span>
+    </div>
+
+
 
     <script src="app.js?v=17"></script>
 </body>

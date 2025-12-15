@@ -1,10 +1,15 @@
 {
     "app": {
         "name": "Il Tuo Bar",
-        "logoUrl": "",
+        "logoUrl": "iltuobarlogo.png",
         "accentColor": "#63A002",
         "theme": "light",
-        "fontFamily": "Inter, sans-serif"
+        "fontFamily": "Inter, sans-serif",
+        "claim": "Simply the best",
+        "openingHours": {
+            "open": "12:00",
+            "close": "23:00"
+        }
     },
     "regional": {
         "locale": "it-IT",
