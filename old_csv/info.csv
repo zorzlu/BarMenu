@@ -1,0 +1,33 @@
+type,day,label_it,label_en,text_it,text_en,link,style,slot1_open,slot1_close,slot_id,is_kitchen,show_in_hero,show_in_info
+time_slot,mon,Apertura,Opening,,,,,07:00,23:00,opening,false,false,true
+time_slot,tue,Apertura,Opening,,,,,07:00,23:00,opening,false,false,true
+time_slot,wed,Apertura,Opening,,,,,07:00,23:00,opening,false,false,true
+time_slot,thu,Apertura,Opening,,,,,07:00,23:00,opening,false,false,true
+time_slot,fri,Apertura,Opening,,,,,07:00,23:00,opening,false,false,true
+time_slot,sat,Apertura,Opening,,,,,08:00,01:00,opening,false,false,true
+time_slot,sun,Apertura,Opening,,,,,08:00,01:00,opening,false,false,true
+time_slot,mon,Pranzo,Lunch,,,,,12:00,15:00,lunch,true,true,true
+time_slot,tue,Pranzo,Lunch,,,,,12:00,15:00,lunch,true,true,true
+time_slot,wed,Pranzo,Lunch,,,,,12:00,15:00,lunch,true,true,true
+time_slot,thu,Pranzo,Lunch,,,,,12:00,15:00,lunch,true,true,true
+time_slot,fri,Pranzo,Lunch,,,,,12:00,15:00,lunch,true,true,true
+time_slot,sat,Pranzo,Lunch,,,,,12:30,15:30,lunch,true,true,true
+time_slot,sun,Pranzo,Lunch,,,,,12:30,15:30,lunch,true,true,true
+time_slot,mon,Aperitivo,Aperitivo,,,,,18:00,20:00,aperitivo,false,true,false
+time_slot,tue,Aperitivo,Aperitivo,,,,,18:00,20:00,aperitivo,false,true,false
+time_slot,wed,Aperitivo,Aperitivo,,,,,18:00,20:00,aperitivo,false,true,false
+time_slot,thu,Aperitivo,Aperitivo,,,,,18:00,20:00,aperitivo,false,true,false
+time_slot,fri,Aperitivo,Aperitivo,,,,,18:00,20:00,aperitivo,false,true,false
+time_slot,sat,Aperitivo,Aperitivo,,,,,18:00,20:00,aperitivo,false,true,false
+time_slot,mon,Cena,Dinner,,,,,19:00,22:30,dinner,true,true,true
+time_slot,tue,Cena,Dinner,,,,,19:00,22:30,dinner,true,true,true
+time_slot,wed,Cena,Dinner,,,,,19:00,22:30,dinner,true,true,true
+time_slot,thu,Cena,Dinner,,,,,19:00,22:30,dinner,true,true,true
+time_slot,fri,Cena,Dinner,,,,,19:00,22:30,dinner,true,true,true
+time_slot,sat,Cena,Dinner,,,,,19:00,23:00,dinner,true,true,true
+menu_header_cuisine,,Piatti del Giorno,Daily Specials,"Scopri i nostri piatti del giorno!","Discover our daily specials!",,,,,,,
+menu_header_bar,,Bevande,Drinks,"Ampia selezione di vini e cocktail.","Wide selection of wines and cocktails.",,plain,,,,,
+text,,Chi Siamo,About Us,"Benvenuti nel nostro locale! Offriamo prodotti freschi e di qualità, selezionati con cura per garantirvi un'esperienza indimenticabile.","Welcome to our place! We offer fresh, quality products, carefully selected to guarantee you an unforgettable experience.",,card,,,,,
+text,,Eventi,Events,"Ogni venerdì musica dal vivo a partire dalle 22:00.","Live music every Friday starting at 10 PM.",,plain,,,,,
+cta,,Prenota un Tavolo,Book a Table,,,tel:+390612345678,primary,,,,,
+cta,,Scrivici su WhatsApp,Message us on WhatsApp,,,https://wa.me/391234567890,secondary,,,,,

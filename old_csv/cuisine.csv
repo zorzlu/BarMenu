@@ -1,0 +1,9 @@
+category,name_it,description_it,price,type,active,category_order,item_order,name_en,description_en,all_1_gluten,all_2_crustaceans,all_3_eggs,all_4_fish,all_5_peanuts,all_6_soy,all_7_milk,all_8_nuts,all_9_celery,all_10_mustard,all_11_sesame,all_12_sulfites,all_13_lupin,all_14_mollusks
+Primi,Carbonara,"Spaghetti, uova, guanciale, pecorino",12.00,standard,true,1,1,Carbonara,"Spaghetti, eggs, guanciale, cheese",true,false,true,false,false,false,true,false,false,false,false,false,false,false
+Primi,Amatriciana,"Spaghetti, pomodoro, guanciale",11.50,standard,true,1,2,Amatriciana,"Spaghetti, tomato, guanciale",true,false,false,false,false,false,false,false,false,false,false,false,false,false
+Primi,Pasta al Pomodoro,"Spaghetti con salsa di pomodoro fresco",9.00,vegan,true,1,3,Tomato Pasta,"Spaghetti with fresh tomato sauce",true,false,false,false,false,false,false,false,false,false,false,false,false,false
+Secondi,Tagliata di Manzo,"Rucola, grana e pachino",18.00,standard,true,2,1,Sliced Beef,"Arugula, parmesan, cherry tomatoes",false,false,false,false,false,false,true,false,false,false,false,false,false,false
+Secondi,Insalata Caprese,"Mozzarella, pomodoro, basilico",10.00,vegetarian,true,2,2,Caprese Salad,"Mozzarella, tomato, basil",false,false,false,false,false,false,true,false,false,false,false,false,false,false
+Secondi,Buddha Bowl,"Quinoa, verdure grigliate, hummus",14.00,vegan,true,2,3,Buddha Bowl,"Quinoa, grilled vegetables, hummus",false,false,false,false,false,false,false,false,false,false,true,false,false,false
+Dolci,Tiramisù,"Fatto in casa",6.00,vegetarian,true,3,1,Tiramisu,"Homemade",true,false,true,false,false,false,true,false,false,false,false,false,false,false
+Dolci,Sorbetto al Limone,"Fresco e leggero",5.00,vegan,true,3,2,Lemon Sorbet,"Fresh and light",false,false,false,false,false,false,false,false,false,false,false,false,false,false

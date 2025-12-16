@@ -1,0 +1,10 @@
+category,name_it,description_it,price,type,active,category_order,item_order,name_en,description_en,all_1_gluten,all_2_crustaceans,all_3_eggs,all_4_fish,all_5_peanuts,all_6_soy,all_7_milk,all_8_nuts,all_9_celery,all_10_mustard,all_11_sesame,all_12_sulfites,all_13_lupin,all_14_mollusks
+Birre,IPA Artigianale,"Birra artigianale 33cl",6.00,vegan,true,1,1,Craft IPA,"Craft beer 33cl",true,false,false,false,false,false,false,false,false,false,false,false,false,false
+Birre,Weiss,"Birra di frumento 50cl",7.00,vegan,true,1,2,Wheat Beer,"Wheat beer 50cl",true,false,false,false,false,false,false,false,false,false,false,false,false,false
+Cocktail,Negroni,"Gin, Vermouth, Campari",8.00,vegan,true,2,1,Negroni,"Gin, Vermouth, Campari",false,false,false,false,false,false,false,false,false,false,false,true,false,false
+Cocktail,Spritz,"Aperol, Prosecco, Soda",6.00,vegan,true,2,2,Spritz,"Aperol, Prosecco, Soda",false,false,false,false,false,false,false,false,false,false,false,true,false,false
+Cocktail,White Russian,"Vodka, Kahlua, Panna",9.00,vegetarian,true,2,3,White Russian,"Vodka, Kahlua, Cream",false,false,false,false,false,false,true,false,false,false,false,true,false,false
+Analcolici,Coca Cola,"33cl vetro",3.50,vegan,true,3,1,Coke,"33cl glass bottle",false,false,false,false,false,false,false,false,false,false,false,false,false,false
+Analcolici,Succo di Frutta,"Pesca o Albicocca",3.00,vegan,true,3,2,Fruit Juice,"Peach or Apricot",false,false,false,false,false,false,false,false,false,false,false,false,false,false
+Snack,Bruschetta Classica,"Pomodoro, aglio, basilico",5.00,vegan,true,4,1,Classic Bruschetta,"Tomato, garlic, basil",true,false,false,false,false,false,false,false,false,false,false,false,false,false
+Snack,Tagliere Formaggi,"Selezione di formaggi locali",12.00,vegetarian,true,4,2,Cheese Board,"Selection of local cheeses",false,false,false,false,false,false,true,false,false,false,false,false,false,false

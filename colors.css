@@ -37,7 +37,7 @@
     --md-sys-color-surface-container-highest: #e2e3d8;
 
     /* Semantic Mappings */
-    --color-bg: var(--md-sys-color-surface);
+    --color-bg: var(--md-sys-color-surface-container-low);
     --color-surface: var(--md-sys-color-surface-container-lowest);
     --color-primary: var(--md-sys-color-on-surface);
     --color-secondary: var(--md-sys-color-on-surface-variant);

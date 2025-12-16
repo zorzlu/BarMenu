@@ -8,7 +8,7 @@ let FOOD_TYPES = {};
 
 // URL config (populated from config.json)
 let CONFIG = {
-    cuisine: { url: '', name: 'Cucina' },
+    kitchen: { url: '', name: 'Cucina' },
     bar: { url: '', name: 'Bar' },
     info: { url: '', name: 'Info' }
 };
@@ -66,11 +66,11 @@ function savePreferences() {
 const savedPrefs = loadPreferences();
 
 let state = {
-    currentTab: 'cuisine',
+    currentTab: 'kitchen',
     currentLanguage: savedPrefs?.language || 'it',
     config: null,
-    data: { cuisine: null, bar: null, info: null },
-    lastFetch: { cuisine: null, bar: null, info: null },
+    data: { kitchen: null, bar: null, info: null },
+    lastFetch: { kitchen: null, bar: null, info: null },
     filters: {
         diet: savedPrefs?.diet || 'all',
         excludeAllergens: savedPrefs?.excludeAllergens || []
@@ -93,6 +93,8 @@ const elements = {
     updateIndicator: document.getElementById('updateIndicator'),
     errorBanner: document.getElementById('errorBanner'),
     retryButton: document.getElementById('retryButton'),
+    staleDataBanner: document.getElementById('staleDataBanner'),
+    staleRetryButton: document.getElementById('staleRetryButton'),
     loadingState: document.getElementById('loadingState'),
     emptyState: document.getElementById('emptyState'),
     menuContainer: document.getElementById('menuContainer'),
@@ -238,30 +240,255 @@ function parseCSV(text) {
 
     if (rows.length === 0) return [];
 
-    const headers = rows[0].map(h => h.toLowerCase().trim());
+    // Get CSV language setting
+    const csvLang = state.config?.app?.csvLanguage || 'en';
+    const csvKeywords = translations?.csvKeywords || {};
+
+    // Translate headers if Italian CSV
+    let headers = rows[0].map(h => h.toLowerCase().trim());
+    if (csvLang === 'it' && csvKeywords.columns) {
+        headers = headers.map(h => csvKeywords.columns[h] || h);
+    }
 
     return rows.slice(1)
         .filter(row => row.length > 1)
         .map(row => {
             const rowObj = {};
             headers.forEach((h, i) => {
-                rowObj[h] = row[i] || '';
+                let value = row[i] || '';
+
+                // Translate Italian values if needed
+                if (csvLang === 'it') {
+                    const lowerVal = value.toLowerCase().trim();
+
+                    // Translate boolean values
+                    if (csvKeywords.values && csvKeywords.values[lowerVal]) {
+                        value = csvKeywords.values[lowerVal];
+                    }
+
+                    // Translate type column
+                    if (h === 'type' && csvKeywords.types && csvKeywords.types[lowerVal]) {
+                        value = csvKeywords.types[lowerVal];
+                    }
+
+                    // Translate day column
+                    if (h === 'day' && csvKeywords.days && csvKeywords.days[lowerVal]) {
+                        value = csvKeywords.days[lowerVal];
+                    }
+                }
+
+                rowObj[h] = value;
             });
             return rowObj;
         });
 }
 
+// Parse unified CSV with horizontal marker row structure
+function parseUnifiedCSV(text) {
+    const cleanText = text.replace(/^\uFEFF/, '');
+    const rows = [];
+    let currentRow = [];
+    let currentField = '';
+    let inQuote = false;
+
+    // Parse CSV into 2D array
+    for (let i = 0; i < cleanText.length; i++) {
+        const char = cleanText[i];
+        const nextChar = cleanText[i + 1];
+
+        if (char === '"') {
+            if (inQuote && nextChar === '"') {
+                currentField += '"';
+                i++;
+            } else {
+                inQuote = !inQuote;
+            }
+        } else if (char === ',' && !inQuote) {
+            currentRow.push(currentField.trim());
+            currentField = '';
+        } else if ((char === '\r' || char === '\n') && !inQuote) {
+            if (char === '\r' && nextChar === '\n') i++;
+            currentRow.push(currentField.trim());
+            rows.push(currentRow);
+            currentRow = [];
+            currentField = '';
+        } else {
+            currentField += char;
+        }
+    }
+
+    if (currentField || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        rows.push(currentRow);
+    }
+
+    if (rows.length < 3) return { bar: [], kitchen: [], timeslots: [], content: [], categories: [] };
+
+    const csvLang = state.config?.app?.csvLanguage || 'en';
+    const csvKeywords = TRANSLATIONS?.csvKeywords || {};
+
+    // Row 0: Table markers (bar, kitchen, timeslots, content, categories)
+    // Row 1: Column headers for each table
+    // Row 2+: Data
+
+    const markerRow = rows[0].map(m => m.toLowerCase().trim());
+    let headerRow = rows[1].map(h => h.toLowerCase().trim());
+
+    // Find table boundaries by detecting changes in marker row
+    const tableBoundaries = [];
+    let currentTable = null;
+    let startCol = 0;
+
+    for (let col = 0; col < markerRow.length; col++) {
+        const tableId = markerRow[col];
+
+        if (tableId !== currentTable) {
+            if (currentTable !== null) {
+                tableBoundaries.push({ table: currentTable, startCol, endCol: col - 1 });
+            }
+            currentTable = tableId;
+            startCol = col;
+        }
+    }
+    if (currentTable !== null) {
+        tableBoundaries.push({ table: currentTable, startCol, endCol: markerRow.length - 1 });
+    }
+
+    // Build reverse lookup maps (Italian → English) from translations (English → Italian)
+    const reverseColumns = {};
+    const reverseTypes = {};
+    const reverseValues = {};
+    const reverseDays = {};
+
+    if (csvLang === 'it' && csvKeywords) {
+        // Invert the mappings for lookup
+        if (csvKeywords.columns) {
+            Object.entries(csvKeywords.columns).forEach(([en, it]) => {
+                reverseColumns[it] = en;
+            });
+        }
+        if (csvKeywords.types) {
+            Object.entries(csvKeywords.types).forEach(([en, it]) => {
+                reverseTypes[it] = en;
+            });
+        }
+        if (csvKeywords.values) {
+            Object.entries(csvKeywords.values).forEach(([en, it]) => {
+                reverseValues[it] = en;
+            });
+        }
+        if (csvKeywords.days) {
+            Object.entries(csvKeywords.days).forEach(([en, it]) => {
+                reverseDays[it] = en;
+            });
+        }
+    }
+
+    // Translate column headers if Italian (use reverse lookup)
+    if (csvLang === 'it') {
+        headerRow = headerRow.map(h => reverseColumns[h] || h);
+    }
+
+    // Extract data for each table
+    const result = { bar: [], kitchen: [], timeslots: [], content: [], categories: [] };
+
+    tableBoundaries.forEach(({ table, startCol, endCol }) => {
+        if (!result.hasOwnProperty(table)) return;
+
+        const tableHeaders = headerRow.slice(startCol, endCol + 1);
+
+        for (let r = 2; r < rows.length; r++) {
+            const row = rows[r];
+            const rowObj = {};
+            let hasData = false;
+
+            tableHeaders.forEach((h, i) => {
+                const colIdx = startCol + i;
+                let value = row[colIdx] || '';
+
+                if (value.trim()) hasData = true;
+
+                // Translate Italian values if needed (use reverse lookup)
+                if (csvLang === 'it' && value) {
+                    const lowerVal = value.toLowerCase().trim();
+
+                    // Translate value columns (vegan, vegetarian, etc.) using reverse lookups
+                    if (reverseValues[lowerVal]) {
+                        value = reverseValues[lowerVal];
+                    }
+
+                    // Translate type column (content types like menu_header_kitchen)
+                    if (h === 'type' && reverseTypes[lowerVal]) {
+                        value = reverseTypes[lowerVal];
+                    }
+
+                    // Translate day column
+                    if (h === 'day' && reverseDays[lowerVal]) {
+                        value = reverseDays[lowerVal];
+                    }
+                }
+
+                rowObj[h] = value;
+            });
+
+            // Only add rows with actual data
+            if (hasData) {
+                result[table].push(rowObj);
+            }
+        }
+    });
+
+    return result;
+}
+
 function isTruthy(val) {
     if (!val) return false;
     const s = String(val).toLowerCase().trim();
-    return ['true', '1', 'x', 'si', 'sì', 'yes'].includes(s);
+    return ['true', '1', 'x', 'si', 'sì', 'yes', 'vero'].includes(s);
+}
+
+// Parse number from CSV, handling Italian (comma) or US (dot) decimal format
+function parseNumber(val) {
+    if (!val) return NaN;
+    const format = state.config?.app?.csvNumberFormat || 'us';
+    let s = String(val).trim();
+    if (format === 'it') {
+        // Italian format: comma is decimal separator
+        s = s.replace(',', '.');
+    }
+    return parseFloat(s);
+}
+
+// Parse time from CSV - handles both HH:MM format and decimal fractions (0.29166667 = 7:00)
+function parseTimeValue(val) {
+    if (!val) return '';
+    let s = String(val).trim();
+
+    // If it looks like HH:MM format, return as-is
+    if (s.includes(':')) return s;
+
+    // Convert Italian decimal format (comma → dot) if needed
+    const format = state.config?.app?.csvNumberFormat || 'us';
+    if (format === 'it') {
+        s = s.replace(',', '.');
+    }
+
+    // Parse as decimal fraction of day (Google Sheets time format)
+    const decimalDays = parseFloat(s);
+    if (isNaN(decimalDays)) return s;
+
+    // Convert to hours and minutes
+    const totalMinutes = Math.round(decimalDays * 24 * 60);
+    const hours = Math.floor(totalMinutes / 60) % 24;
+    const minutes = totalMinutes % 60;
+
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
 function parsePrice(val) {
     if (!val) return '';
-    let s = String(val).replace(',', '.');
-    let n = parseFloat(s);
-    return isNaN(n) ? s : n.toFixed(2).replace('.', ',');
+    const n = parseNumber(val);
+    return isNaN(n) ? String(val).trim() : n.toFixed(2).replace('.', ',');
 }
 
 function getAllergens(row) {
@@ -286,42 +513,65 @@ function escapeHTML(str) {
 // Data Processing
 // ========================================
 
-function processMenuData(rawData) {
-    const activeItems = rawData.filter(row => isTruthy(row.attivo));
+function processMenuData(rawData, categoryData = []) {
+    // Column names are now English (translated from Italian in parseCSV if needed)
+    // Item order is determined by row position in CSV (index)
+    // Category order comes from categories table
+
+    // Build category order lookup from categories table
+    const categoryOrderMap = {};
+    categoryData.forEach(cat => {
+        categoryOrderMap[cat.id] = parseFloat(cat.order) || 999;
+    });
+
+    const activeItems = rawData.filter(row => isTruthy(row.active));
 
     let lastSheetUpdate = null;
     rawData.forEach(r => {
-        if (r.ultimo_aggiornamento?.trim()) lastSheetUpdate = r.ultimo_aggiornamento.trim();
+        if (r.last_updated?.trim()) lastSheetUpdate = r.last_updated.trim();
+    });
+
+    // Build category label lookup from categories table
+    const categoryLabelMap = {};
+    categoryData.forEach(cat => {
+        const catId = (cat.category_id || cat.id || '').toLowerCase().trim();
+        categoryLabelMap[catId] = {
+            label_it: cat.label_it || catId,
+            label_en: cat.label_en || catId
+        };
     });
 
     const categories = {};
-    activeItems.forEach(row => {
-        const catName = row.categoria || 'Altro';
-        if (!categories[catName]) {
-            categories[catName] = {
-                name: catName,
-                order: parseFloat(row.ordine_categoria) || 999,
+    activeItems.forEach((row, index) => {
+        const catId = (row.category || 'other').toLowerCase().trim();
+        const catLabels = categoryLabelMap[catId] || { label_it: catId, label_en: catId };
+
+        if (!categories[catId]) {
+            categories[catId] = {
+                id: catId,
+                name_it: catLabels.label_it,
+                name_en: catLabels.label_en,
+                order: categoryOrderMap[catId] || 999,
                 items: []
             };
         }
 
-        const tipo = (row.tipo || 'standard').toLowerCase().trim();
+        const tipo = (row.type || 'standard').toLowerCase().trim();
 
-        categories[catName].items.push({
-            nome_it: row.nome_it || '',
-            nome_en: row.nome_en || row.nome_it || '',
-            desc_it: row.descrizione_it || '',
-            desc_en: row.descrizione_en || row.descrizione_it || '',
-            price: parsePrice(row.prezzo),
-            order: parseFloat(row.ordine_prodotto) || 999,
+        categories[catId].items.push({
+            nome_it: row.name_it || '',
+            nome_en: row.name_en || row.name_it || '',
+            desc_it: row.description_it || '',
+            desc_en: row.description_en || row.description_it || '',
+            price: parsePrice(row.price),
+            order: index, // Use row index for ordering (preserves CSV order)
             allergens: getAllergens(row),
             allergenKeys: getAllergenKeys(row),
             tipo: tipo
         });
     });
 
-    Object.values(categories).forEach(c => c.items.sort((a, b) => a.order - b.order));
-
+    // Items already in CSV order, just sort categories by their order
     return {
         categories: Object.values(categories).sort((a, b) => a.order - b.order),
         lastSheetUpdate
@@ -371,37 +621,55 @@ function collapseAdjacentDays(entries) {
 
 function processInfoData(rawData) {
     const sections = {
-        hoursLocationRaw: [],
-        hoursKitchenRaw: [],
-        hoursLocation: [],
-        hoursKitchen: [],
-        menuHeaderCuisine: null,
+        timeSlots: [], // Unified: all time-based periods
+        timeSlotsForHero: [], // Filtered: show_in_hero === true
+        timeSlotsForInfo: [], // Filtered: show_in_info === true (grouped for display)
+        menuHeaderKitchen: null,
         menuHeaderBar: null,
         contentItems: [] // Preserves order of texts and CTAs
     };
+
+    // Map to collect time slots by slot_id
+    const timeSlotsMap = new Map();
+
+    // Day name to number mapping (1=Mon...7=Sun)
+    const dayToNum = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 7 };
 
     rawData.forEach(row => {
         const type = (row.type || '').toLowerCase().trim();
         const day = (row.day || '').toLowerCase().trim();
 
-        if (type === 'hours_location' && day) {
-            sections.hoursLocationRaw.push({
-                day,
-                label_it: row.label_it || '',
-                label_en: row.label_en || '',
-                slot1: row.slot1_open && row.slot1_close ? `${row.slot1_open} - ${row.slot1_close}` : '',
-                slot2: row.slot2_open && row.slot2_close ? `${row.slot2_open} - ${row.slot2_close}` : ''
-            });
-        } else if (type === 'hours_kitchen' && day) {
-            sections.hoursKitchenRaw.push({
-                day,
-                label_it: row.label_it || '',
-                label_en: row.label_en || '',
-                slot1: row.slot1_open && row.slot1_close ? `${row.slot1_open} - ${row.slot1_close}` : '',
-                slot2: row.slot2_open && row.slot2_close ? `${row.slot2_open} - ${row.slot2_close}` : ''
-            });
-        } else if (type === 'menu_header_cuisine') {
-            sections.menuHeaderCuisine = {
+        if (type === 'time_slot' && day && row.slot_id) {
+            // Parse unified time_slot rows
+            const slotId = row.slot_id.toLowerCase().trim();
+            const dayNum = dayToNum[day];
+            if (!dayNum) return;
+
+            if (!timeSlotsMap.has(slotId)) {
+                timeSlotsMap.set(slotId, {
+                    id: slotId,
+                    label_it: row.label_it || slotId,
+                    label_en: row.label_en || slotId,
+                    isKitchen: row.is_kitchen === 'true',
+                    showInHero: row.show_in_hero === 'true',
+                    showInInfo: row.show_in_info === 'true',
+                    schedule: []
+                });
+            }
+
+            const slot = timeSlotsMap.get(slotId);
+            // Add schedule entry for this day
+            if (row.slot1_open && row.slot1_close) {
+                slot.schedule.push({
+                    day: dayNum,
+                    dayLabel_it: row.label_it || '',
+                    dayLabel_en: row.label_en || '',
+                    open: row.slot1_open,
+                    close: row.slot1_close
+                });
+            }
+        } else if (type === 'menu_header_kitchen') {
+            sections.menuHeaderKitchen = {
                 title_it: row.label_it || '',
                 title_en: row.label_en || '',
                 text_it: row.text_it || '',
@@ -436,12 +704,72 @@ function processInfoData(rawData) {
         }
     });
 
-    // Collapse adjacent days with same time slots
-    sections.hoursLocation = collapseAdjacentDays(sections.hoursLocationRaw);
-    sections.hoursKitchen = collapseAdjacentDays(sections.hoursKitchenRaw);
+    // Convert timeSlots map to array
+    sections.timeSlots = Array.from(timeSlotsMap.values());
+
+    // Filter for hero display
+    sections.timeSlotsForHero = sections.timeSlots.filter(s => s.showInHero);
+
+    // Filter for info page display and collapse adjacent days
+    sections.timeSlotsForInfo = sections.timeSlots
+        .filter(s => s.showInInfo)
+        .map(slot => ({
+            ...slot,
+            collapsedSchedule: collapseTimeSlotDays(slot.schedule)
+        }));
 
     return sections;
 }
+
+// Helper: Collapse adjacent days with same open/close times for info page display
+function collapseTimeSlotDays(schedule) {
+    if (!schedule || schedule.length === 0) return [];
+
+    // Sort by day
+    const sorted = [...schedule].sort((a, b) => a.day - b.day);
+
+    const dayNames_it = ['', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    const dayNames_en = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    const collapsed = [];
+    let current = null;
+
+    for (const sched of sorted) {
+        const key = `${sched.open}-${sched.close}`;
+
+        if (current && current.key === key && current.endDay === sched.day - 1) {
+            // Extend current range
+            current.endDay = sched.day;
+        } else {
+            // Start new range
+            if (current) collapsed.push(current);
+            current = {
+                key,
+                startDay: sched.day,
+                endDay: sched.day,
+                open: sched.open,
+                close: sched.close
+            };
+        }
+    }
+    if (current) collapsed.push(current);
+
+    // Format day ranges
+    return collapsed.map(c => {
+        const start_it = dayNames_it[c.startDay];
+        const end_it = dayNames_it[c.endDay];
+        const start_en = dayNames_en[c.startDay];
+        const end_en = dayNames_en[c.endDay];
+
+        return {
+            days_it: c.startDay === c.endDay ? start_it : `${start_it} - ${end_it}`,
+            days_en: c.startDay === c.endDay ? start_en : `${start_en} - ${end_en}`,
+            times: `${c.open} - ${c.close}`
+        };
+    });
+}
+
+
 
 // ========================================
 // Filtering Logic
@@ -453,11 +781,11 @@ function applyFiltersToData(categories) {
     return categories
         .map(cat => {
             const filteredItems = cat.items.filter(item => {
-                // Diet filter
-                if (diet === 'vegan' && item.tipo !== 'vegano') {
+                // Diet filter (item.tipo is in English after translation: vegan, vegetarian, standard)
+                if (diet === 'vegan' && item.tipo !== 'vegan') {
                     return false;
                 }
-                if (diet === 'vegetarian' && item.tipo !== 'vegetariano' && item.tipo !== 'vegano') {
+                if (diet === 'vegetarian' && item.tipo !== 'vegetarian' && item.tipo !== 'vegan') {
                     return false;
                 }
 
@@ -508,7 +836,7 @@ function applyConfig() {
 
     // Update CONFIG URLs
     if (urls) {
-        CONFIG.cuisine.url = urls.cuisine;
+        CONFIG.kitchen.url = urls.kitchen;
         CONFIG.bar.url = urls.bar;
         CONFIG.info = { url: urls.info, name: 'Info' };
     }
@@ -522,6 +850,182 @@ function applyConfig() {
     if (foodTypes) {
         FOOD_TYPES = foodTypes;
     }
+}
+
+// Fetch and process unified menu.csv (single file with all tables)
+async function fetchUnifiedData(isRefresh = true) {
+    try {
+        const menuUrl = state.config?.urls?.menu;
+        let response;
+        let text;
+        let usingFallback = false;
+
+        // Try remote URL first if configured
+        if (menuUrl) {
+            try {
+                const fetchUrl = menuUrl + (menuUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+                response = await fetch(fetchUrl);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                text = await response.text();
+            } catch (err) {
+                console.warn(`Remote menu fetch failed (${err.message}). Falling back to local file.`);
+                response = null;
+                usingFallback = true;
+            }
+        } else {
+            usingFallback = true;
+        }
+
+        // Fallback to local fallback_data.csv
+        if (!text) {
+            response = await fetch(`./fallback_data.csv?t=${Date.now()}`);
+            if (!response.ok) throw new Error(`Fallback file not found: ${response.status}`);
+            text = await response.text();
+        }
+
+        // Track fallback state and show/hide warning
+        state.usingFallback = usingFallback;
+        if (elements.staleDataBanner) {
+            elements.staleDataBanner.hidden = !usingFallback;
+        }
+
+
+        const parsed = parseUnifiedCSV(text);
+
+        // Process each table (pass categories for order lookup)
+        state.data.bar = processMenuData(parsed.bar, parsed.categories);
+        state.data.kitchen = processMenuData(parsed.kitchen, parsed.categories);
+        state.data.timeslots = processTimeslotsData(parsed.timeslots);
+        state.data.content = processContentData(parsed.content);
+        state.data.categories = parsed.categories;
+
+        console.log('Timeslots raw (first 3):', parsed.timeslots?.slice(0, 3));
+        console.log('Processed timeslots:', state.data.timeslots);
+
+        // Create info object for compatibility with existing hero/info page logic
+        state.data.info = {
+            timeSlots: state.data.timeslots.timeSlots || [],
+            timeSlotsForHero: state.data.timeslots.timeSlotsForHero || [],
+            timeSlotsForInfo: state.data.timeslots.timeSlotsForInfo || [],
+            menuHeaderKitchen: state.data.content.menuHeaderKitchen,
+            menuHeaderBar: state.data.content.menuHeaderBar,
+            contentItems: state.data.content.contentItems
+        };
+
+        state.lastFetch.unified = new Date();
+
+        if (isRefresh) {
+            render();
+            elements.errorBanner.hidden = true;
+            if (!elements.loadingState.hidden) elements.loadingState.hidden = true;
+            showUpdateIndicator();
+        }
+
+    } catch (e) {
+        console.error('Unified fetch error:', e);
+        if (isRefresh) {
+            elements.errorBanner.hidden = false;
+            elements.loadingState.hidden = true;
+        }
+    }
+}
+
+// Process timeslots data (from unified CSV)
+function processTimeslotsData(rawData) {
+    const timeSlotsMap = new Map();
+    const dayToNum = { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 7 };
+
+    rawData.forEach(row => {
+        const slotId = (row.slot_id || '').toLowerCase().trim();
+        const day = (row.day || '').toLowerCase().trim();
+        const dayNum = dayToNum[day];
+
+        if (!slotId || !dayNum) return;
+
+        if (!timeSlotsMap.has(slotId)) {
+            timeSlotsMap.set(slotId, {
+                id: slotId,
+                label_it: row.label_it || slotId,
+                label_en: row.label_en || slotId,
+                isKitchen: isTruthy(row.is_kitchen),
+                showInHero: isTruthy(row.show_in_hero),
+                showInInfo: isTruthy(row.show_in_info),
+                schedule: []
+            });
+        }
+
+        const slot = timeSlotsMap.get(slotId);
+        if (row.open && row.close) {
+            slot.schedule.push({
+                day: dayNum,
+                open: parseTimeValue(row.open),
+                close: parseTimeValue(row.close)
+            });
+        }
+    });
+
+    const timeSlots = Array.from(timeSlotsMap.values());
+
+    return {
+        timeSlots,
+        timeSlotsForHero: timeSlots.filter(s => s.showInHero),
+        timeSlotsForInfo: timeSlots
+            .filter(s => s.showInInfo)
+            .map(slot => ({
+                ...slot,
+                collapsedSchedule: collapseTimeSlotDays(slot.schedule)
+            }))
+    };
+}
+
+// Process content data (texts, CTAs, headers from unified CSV)
+function processContentData(rawData) {
+    const result = {
+        menuHeaderKitchen: null,
+        menuHeaderBar: null,
+        contentItems: []
+    };
+
+    rawData.forEach(row => {
+        const type = (row.type || '').toLowerCase().trim();
+
+        if (type === 'menu_header_kitchen') {
+            result.menuHeaderKitchen = {
+                title_it: row.label_it || '',
+                title_en: row.label_en || '',
+                text_it: row.text_it || '',
+                text_en: row.text_en || '',
+                style: row.style || 'card'
+            };
+        } else if (type === 'menu_header_bar') {
+            result.menuHeaderBar = {
+                title_it: row.label_it || '',
+                title_en: row.label_en || '',
+                text_it: row.text_it || '',
+                text_en: row.text_en || '',
+                style: row.style || 'card'
+            };
+        } else if (type === 'text') {
+            result.contentItems.push({
+                type: 'text',
+                label_it: row.label_it || '',
+                label_en: row.label_en || '',
+                text_it: row.text_it || '',
+                text_en: row.text_en || '',
+                style: row.style || 'plain'
+            });
+        } else if (type === 'cta') {
+            result.contentItems.push({
+                type: 'cta',
+                label_it: row.label_it || '',
+                label_en: row.label_en || '',
+                link: row.link || '',
+                style: row.style || 'secondary'
+            });
+        }
+    });
+
+    return result;
 }
 
 async function fetchData(tab, isRefresh = true) {
@@ -551,7 +1055,10 @@ async function fetchData(tab, isRefresh = true) {
         }
 
         if (usingFallback) {
-            response = await fetch(`./${tab}.csv?t=${Date.now()}`);
+            // Load correct language version of CSV
+            const csvLang = state.config?.app?.csvLanguage || 'en';
+            const suffix = csvLang === 'it' ? '_it' : '';
+            response = await fetch(`./${tab}${suffix}.csv?t=${Date.now()}`);
             if (!response.ok) throw new Error(`Local file not found: ${response.status}`);
             text = await response.text();
         }
@@ -634,7 +1141,7 @@ function render() {
     // Menu header card (if available from info.csv) - displayed inline in menu
     const infoData = state.data.info;
     if (infoData) {
-        const header = tab === 'cuisine' ? infoData.menuHeaderCuisine : infoData.menuHeaderBar;
+        const header = tab === 'kitchen' ? infoData.menuHeaderKitchen : infoData.menuHeaderBar;
         if (header) {
             const title = lang === 'it' ? header.title_it : header.title_en;
             const text = lang === 'it' ? header.text_it : header.text_en;
@@ -651,9 +1158,10 @@ function render() {
     }
 
     filteredCategories.forEach(cat => {
+        const categoryName = lang === 'it' ? cat.name_it : cat.name_en;
         html += `
             <section class="category-section">
-                <h2 class="category-title">${escapeHTML(cat.name)}</h2>
+                <h2 class="category-title">${escapeHTML(categoryName)}</h2>
                 <div class="menu-items">
         `;
 
@@ -736,41 +1244,28 @@ function renderInfoPage() {
 
     html += `<div _ngcontent-hlg-c24="" class="squiggle"><svg _ngcontent-hlg-c24="" aria-hidden="true" width="100%" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><pattern _ngcontent-hlg-c24="" id="a" width="91" height="8" patternUnits="userSpaceOnUse"><g _ngcontent-hlg-c24="" clip-path="url(#clip0_2426_11367)"><path _ngcontent-hlg-c24="" d="M114 4c-5.067 4.667-10.133 4.667-15.2 0S88.667-.667 83.6 4 73.467 8.667 68.4 4 58.267-.667 53.2 4 43.067 8.667 38 4 27.867-.667 22.8 4 12.667 8.667 7.6 4-2.533-.667-7.6 4s-10.133 4.667-15.2 0S-32.933-.667-38 4s-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0" stroke="#E1E3E1" stroke-linecap="square"></path></g></pattern><rect _ngcontent-hlg-c24="" width="100%" height="100%" fill="url(#a)"></rect></svg></div>`;
 
-    // 2. Timetables (from CSV - localized)
-    const hoursLocationTitle = lang === 'it' ? 'Orari Apertura' : 'Opening Hours';
-    const hoursKitchenTitle = lang === 'it' ? 'Orari Cucina' : 'Kitchen Hours';
-
-    if (data.hoursLocation.length > 0 || data.hoursKitchen.length > 0) {
+    // 2. Timetables (from unified time_slot rows in CSV)
+    if (data.timeSlotsForInfo && data.timeSlotsForInfo.length > 0) {
         html += `<section class="info-card">`;
 
-        if (data.hoursLocation.length > 0) {
-            html += `<h3 class="info-title">${hoursLocationTitle}</h3><div class="timetable-grid">`;
-            data.hoursLocation.forEach(h => {
-                const days = lang === 'it' ? h.days_it : h.days_en;
-                const times = h.slot2 ? `${h.slot1} / ${h.slot2}` : h.slot1;
-                html += `
-                    <div class="time-row">
-                        <span class="time-days">${escapeHTML(days)}</span>
-                        <span class="time-hours">${escapeHTML(times)}</span>
-                    </div>`;
-            });
-            html += `</div>`;
-        }
+        data.timeSlotsForInfo.forEach((slot, index) => {
+            const title = lang === 'it' ? slot.label_it : slot.label_en;
+            const marginTop = index > 0 ? 'margin-top: 16px;' : '';
 
-        if (data.hoursKitchen.length > 0) {
-            const marginTop = data.hoursLocation.length > 0 ? 'margin-top: 16px;' : '';
-            html += `<h3 class="info-title" style="${marginTop}">${hoursKitchenTitle}</h3><div class="timetable-grid">`;
-            data.hoursKitchen.forEach(h => {
-                const days = lang === 'it' ? h.days_it : h.days_en;
-                const times = h.slot2 ? `${h.slot1} / ${h.slot2}` : h.slot1;
-                html += `
-                    <div class="time-row">
-                        <span class="time-days">${escapeHTML(days)}</span>
-                        <span class="time-hours">${escapeHTML(times)}</span>
-                    </div>`;
-            });
-            html += `</div>`;
-        }
+            if (slot.collapsedSchedule && slot.collapsedSchedule.length > 0) {
+                html += `<h3 class="info-title" style="${marginTop}">${escapeHTML(title)}</h3><div class="timetable-grid">`;
+                slot.collapsedSchedule.forEach(sched => {
+                    const days = lang === 'it' ? sched.days_it : sched.days_en;
+                    html += `
+                        <div class="time-row">
+                            <span class="time-days">${escapeHTML(days)}</span>
+                            <span class="time-hours">${escapeHTML(sched.times)}</span>
+                        </div>`;
+                });
+                html += `</div>`;
+            }
+        });
+
         html += `</section>`;
     }
 
@@ -1144,12 +1639,7 @@ function switchTab(newTab) {
     state.currentTab = newTab;
 
     // Announce page change for screen readers
-    const tabNames = {
-        cuisine: { it: 'Menu Cucina', en: 'Kitchen Menu' },
-        bar: { it: 'Menu Bar', en: 'Bar Menu' },
-        info: { it: 'Informazioni', en: 'Information' }
-    };
-    const announceName = tabNames[newTab]?.[state.currentLanguage] || newTab;
+    const announceName = t(`tab${newTab.charAt(0).toUpperCase() + newTab.slice(1)}`);
     announceToSR(announceName);
 
     if (state.data[newTab]) {
@@ -1170,51 +1660,125 @@ function switchTab(newTab) {
 }
 
 // ========================================
-// Kitchen Status Logic
+// Time Slots & Hero Status Logic
 // ========================================
 
-function updateKitchenStatus() {
-    // openingHours is under config.app, not config directly
-    if (!state.config?.app?.openingHours || !elements.kitchenStatus) return;
+// Parse time string "HH:MM" to minutes since midnight
+function parseTimeToMinutes(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
+}
 
-    const { open, close } = state.config.app.openingHours;
-    if (!open || !close) return;
+// Get upcoming time slots for today
+function getUpcomingSlots(now) {
+    // Use only slots marked for hero display
+    const timeSlots = state.data?.info?.timeSlotsForHero;
+    if (!timeSlots || !Array.isArray(timeSlots)) return [];
+
+    const lang = state.currentLanguage;
+    // JavaScript getDay(): 0=Sun, 1=Mon...6=Sat. Convert to 1=Mon...7=Sun
+    const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const upcoming = [];
+
+    for (const slot of timeSlots) {
+        const label = slot[`label_${lang}`] || slot.label_en || slot.id;
+
+        for (const sched of slot.schedule || []) {
+            // CSV structure has single day per row (sched.day is a number)
+            if (sched.day !== dayOfWeek) continue;
+
+            const openMinutes = parseTimeToMinutes(sched.open);
+            const closeMinutes = parseTimeToMinutes(sched.close);
+
+            // Only show slots that haven't ended yet
+            if (closeMinutes > currentMinutes || closeMinutes < openMinutes) {
+                // Currently active
+                if (openMinutes <= currentMinutes && currentMinutes < closeMinutes) {
+                    upcoming.push({
+                        label,
+                        status: 'active',
+                        isKitchen: slot.isKitchen,
+                        minutesUntil: 0
+                    });
+                }
+                // Opening later today
+                else if (openMinutes > currentMinutes) {
+                    upcoming.push({
+                        label,
+                        status: 'upcoming',
+                        isKitchen: slot.isKitchen,
+                        minutesUntil: openMinutes - currentMinutes
+                    });
+                }
+            }
+        }
+    }
+
+    // Sort by status (active first) then by minutesUntil
+    upcoming.sort((a, b) => {
+        if (a.status === 'active' && b.status !== 'active') return -1;
+        if (a.status !== 'active' && b.status === 'active') return 1;
+        return a.minutesUntil - b.minutesUntil;
+    });
+
+    return upcoming.slice(0, 3); // Max 3 items
+}
+
+// Format duration nicely
+function formatDuration(minutes) {
+    if (minutes < 60) {
+        return t('inMinutes').replace('{minutes}', minutes);
+    } else {
+        const hours = Math.round(minutes / 60);
+        return t('inHours').replace('{hours}', hours);
+    }
+}
+
+// Update hero status display
+function updateKitchenStatus() {
+    if (!elements.kitchenStatus) return;
+
+    // Time slots come from unified CSV parsed data
+    const timeSlots = state.data?.info?.timeSlotsForHero;
+    if (!timeSlots || timeSlots.length === 0) {
+        elements.kitchenStatus.hidden = true;
+        return;
+    }
 
     const now = new Date();
-    const [openH, openM] = open.split(':').map(Number);
-    const [closeH, closeM] = close.split(':').map(Number);
+    const upcomingSlots = getUpcomingSlots(now);
 
-    const openTime = new Date(now);
-    openTime.setHours(openH, openM, 0);
-
-    const closeTime = new Date(now);
-    closeTime.setHours(closeH, closeM, 0);
-
-    // Handle case where close time is next day (e.g. 01:00)
-    if (closeTime < openTime) {
-        closeTime.setDate(closeTime.getDate() + 1);
+    if (upcomingSlots.length === 0) {
+        elements.kitchenStatus.hidden = true;
+        return;
     }
 
-    let statusText = '';
+    // Build status text
+    const parts = [];
 
-    // Calculate difference in minutes
-    const diffMs = openTime - now;
-    const diffMins = Math.ceil(diffMs / (1000 * 60));
+    for (const slot of upcomingSlots) {
+        if (slot.status === 'active') {
+            // Currently active - show as "Pranzo ✓" or just the label
+            parts.push(`${slot.label} ✓`);
+        } else {
+            // Upcoming - show as "Cena tra 2h"
+            parts.push(`${slot.label} ${formatDuration(slot.minutesUntil)}`);
+        }
+    }
 
-    if (now >= openTime && now < closeTime) {
-        // Kitchen Open
-        statusText = t('kitchenOpen');
-    } else if (diffMins > 0 && diffMins <= 30) {
-        // Opening Soon (< 30m)
-        statusText = t('kitchenOpensIn').replace('{minutes}', diffMins);
+    if (parts.length > 0) {
+        // Show "Prossimo oggi: X, Y" or just the active ones
+        const hasActive = upcomingSlots.some(s => s.status === 'active');
+        const prefix = hasActive ? '' : t('nextToday') + ': ';
+        elements.kitchenStatus.textContent = prefix + parts.join(' · ');
+        elements.kitchenStatus.hidden = false;
     } else {
-        // Closed - use "opens tomorrow" key (generic)
-        statusText = t('kitchenOpensTomorrow').replace('{time}', open);
+        elements.kitchenStatus.hidden = true;
     }
-
-    elements.kitchenStatus.textContent = statusText;
-    elements.kitchenStatus.hidden = false;
 }
+
 
 // Tab Navigation
 elements.navItems.forEach(btn => {
@@ -1230,8 +1794,13 @@ elements.langSwitch.addEventListener('click', () => {
     announceToSR(state.currentLanguage === 'it' ? 'Italiano' : 'English');
 });
 
-// Retry Button
-elements.retryButton.addEventListener('click', () => fetchData(state.currentTab));
+// Retry Button (error banner)
+elements.retryButton.addEventListener('click', () => fetchUnifiedData(true));
+
+// Stale Data Retry Button
+if (elements.staleRetryButton) {
+    elements.staleRetryButton.addEventListener('click', () => fetchUnifiedData(true));
+}
 
 // Filter Modal
 elements.filterTrigger.addEventListener('click', openFilterModal);
@@ -1328,14 +1897,10 @@ async function init() {
         }
 
         // Initial load logic...
-        if (!state.currentTab) state.currentTab = 'cuisine';
+        if (!state.currentTab) state.currentTab = 'kitchen';
 
-        // Load all data in parallel, wait for all to complete
-        await Promise.all([
-            fetchData('cuisine', false),
-            fetchData('bar', false),
-            fetchData('info', false)
-        ]);
+        // Load all data from unified menu.csv (single fetch)
+        await fetchUnifiedData(false);
 
         // All data loaded - now render
         render();
@@ -1365,7 +1930,7 @@ async function init() {
 
             if (!last || (now - last > STALE_THRESHOLD)) {
                 // Refresh all tabs when returning after being stale
-                fetchData('cuisine');
+                fetchData('kitchen');
                 fetchData('bar');
                 fetchData('info');
             }

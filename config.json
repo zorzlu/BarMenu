@@ -6,10 +6,8 @@
         "theme": "light",
         "fontFamily": "Inter, sans-serif",
         "claim": "Simply the best",
-        "openingHours": {
-            "open": "12:00",
-            "close": "23:00"
-        }
+        "csvLanguage": "it",
+        "csvNumberFormat": "it"
     },
     "regional": {
         "locale": "it-IT",
@@ -41,79 +39,77 @@
         ]
     },
     "urls": {
-        "cuisine": "cuisine.csv",
-        "bar": "bar.csv",
-        "info": "info.csv"
+        "menu": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyK90FkAcIV3fRIq854TaE0n4PChD8jPhoSnGKJKhMco9cx4mhGljtG16zd9yTFm6m3prTl1zST1dS/pub?gid=1317594543&single=true&output=csv"
     },
     "allergens": {
-        "all_1_glutine": {
+        "all_1_gluten": {
             "number": 1,
-            "key": "glutine",
+            "key": "gluten",
             "icon": "🌾"
         },
-        "all_2_crostacei": {
+        "all_2_crustaceans": {
             "number": 2,
-            "key": "crostacei",
+            "key": "crustaceans",
             "icon": "🦐"
         },
-        "all_3_uova": {
+        "all_3_eggs": {
             "number": 3,
-            "key": "uova",
+            "key": "eggs",
             "icon": "🥚"
         },
-        "all_4_pesce": {
+        "all_4_fish": {
             "number": 4,
-            "key": "pesce",
+            "key": "fish",
             "icon": "🐟"
         },
-        "all_5_arachidi": {
+        "all_5_peanuts": {
             "number": 5,
-            "key": "arachidi",
+            "key": "peanuts",
             "icon": "🥜"
         },
-        "all_6_soia": {
+        "all_6_soy": {
             "number": 6,
-            "key": "soia",
+            "key": "soy",
             "icon": "🫘"
         },
-        "all_7_latte": {
+        "all_7_milk": {
             "number": 7,
-            "key": "latte",
+            "key": "milk",
             "icon": "🥛"
         },
-        "all_8_frutta_a_guscio": {
+        "all_8_nuts": {
             "number": 8,
-            "key": "frutta_a_guscio",
+            "key": "nuts",
             "icon": "🌰"
         },
-        "all_9_sedano": {
+        "all_9_celery": {
             "number": 9,
-            "key": "sedano",
+            "key": "celery",
             "icon": "🥬"
         },
-        "all_10_senape": {
+        "all_10_mustard": {
             "number": 10,
-            "key": "senape",
+            "key": "mustard",
             "icon": "🟡"
         },
-        "all_11_sesamo": {
+        "all_11_sesame": {
             "number": 11,
-            "key": "sesamo",
+            "key": "sesame",
             "icon": "🫛"
         },
-        "all_12_solfiti": {
+        "all_12_sulfites": {
             "number": 12,
-            "key": "solfiti",
+            "key": "sulfites",
             "icon": "🍷"
         },
-        "all_13_lupini": {
+        "all_13_lupin": {
             "number": 13,
-            "key": "lupini",
+            "key": "lupin",
             "icon": "🌸"
         },
-        "all_14_molluschi": {
+        "all_14_mollusks": {
             "number": 14,
-            "key": "molluschi",
+            "key": "mollusks",
             "icon": "🐚"
         }
     },
@@ -123,15 +119,15 @@
             "icon": "",
             "class": ""
         },
-        "vegetariano": {
+        "vegetarian": {
             "labelKey": "dietVegetarian",
             "icon": "🌿",
-            "class": "vegetariano"
+            "class": "vegetarian"
         },
-        "vegano": {
+        "vegan": {
             "labelKey": "dietVegan",
             "icon": "🌱",
-            "class": "vegano"
+            "class": "vegan"
         }
     }
 }

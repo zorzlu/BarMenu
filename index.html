@@ -97,7 +97,7 @@
     </div><!-- /app-container -->
 
     <nav class="bottom-nav">
-        <button class="nav-item active" data-target="cuisine">
+        <button class="nav-item active" data-target="kitchen">
             <div class="nav-icon">
                 <span class="fluent-icon icon-regular">&#xf444;</span> <!-- food-24-regular -->
                 <span class="fluent-icon icon-filled">&#xf448;</span> <!-- food-24-filled -->
@@ -168,10 +168,16 @@
         </div>
     </div>
 
-    <!-- Error Banner -->
+    <!-- Error Banner (critical) -->
     <div class="error-banner" id="errorBanner" role="alert" hidden>
         <span class="error-message" data-i18n="errorMessage">Menu non disponibile.</span>
         <button class="retry-button" id="retryButton" data-i18n="retry">Riprova</button>
+    </div>
+
+    <!-- Stale Data Warning Banner (non-critical) -->
+    <div class="stale-data-banner" id="staleDataBanner" role="alert" hidden>
+        <span class="stale-message" data-i18n="staleDataMessage">Dati potrebbero non essere aggiornati.</span>
+        <button class="retry-button" id="staleRetryButton" data-i18n="retry">Riprova</button>
     </div>
 
     <!-- Update indicator -->
