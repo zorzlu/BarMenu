@@ -884,6 +884,22 @@ button:focus-visible {
     color: var(--md-sys-color-on-primary-container);
     /* Inactive Color */
     padding: 0;
+    position: relative;
+    transition: transform 0.1s ease-out;
+}
+
+/* Material 3 State Layer - Hover */
+.nav-item:hover .nav-icon {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Material 3 State Layer - Pressed/Active */
+.nav-item:active {
+    transform: scale(0.95);
+}
+
+.nav-item:active .nav-icon {
+    background-color: rgba(0, 0, 0, 0.12);
 }
 
 .nav-icon {
@@ -1125,12 +1141,12 @@ button:focus-visible {
     line-height: 1;
 }
 
-.food-type-badge.vegetariano {
+.food-type-badge.vegetarian {
     background: var(--color-vegetarian-bg);
     color: var(--color-vegetarian);
 }
 
-.food-type-badge.vegano {
+.food-type-badge.vegan {
     background: var(--color-vegan-bg);
     color: var(--color-vegan);
 }

@@ -2,7 +2,7 @@
     "app": {
         "name": "Il Tuo Bar",
         "logoUrl": "iltuobarlogo.png",
-        "accentColor": "#63A002",
+        "accentColor": "#A6507E",
         "theme": "light",
         "fontFamily": "Inter, sans-serif",
         "claim": "Simply the best",
