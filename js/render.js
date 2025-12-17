@@ -152,6 +152,11 @@ export function render() {
     const tab = state.currentTab;
     const data = state.data[tab];
 
+    // Always render static hero content (logos, etc.) regardless of data state
+    updateHeroContent();
+    // Ensure filter bar visibility logic is correct per tab
+    document.querySelector('.filter-bar').hidden = (tab === 'info');
+
     if (!data) {
         elements.menuContainer.hidden = true;
         elements.emptyState.hidden = true;
@@ -162,17 +167,12 @@ export function render() {
     elements.loadingState.hidden = true;
 
     if (tab === 'info') {
-        document.querySelector('.filter-bar').hidden = true;
-        updateHeroContent();
         renderInfoPage();
         elements.menuContainer.hidden = true;
         elements.infoContainer.hidden = false;
         elements.emptyState.hidden = true;
         return;
     }
-
-    document.querySelector('.filter-bar').hidden = false;
-    updateHeroContent();
 
     elements.infoContainer.hidden = true;
     const filteredCategories = applyFiltersToData(data.categories);
@@ -318,30 +318,44 @@ function renderInfoPage() {
         }
     });
 
-    html += `<div class="squiggle"><svg aria-hidden="true" width="100%" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><pattern id="a" width="91" height="8" patternUnits="userSpaceOnUse"><g clip-path="url(#clip0_2426_11367)"><path d="M114 4c-5.067 4.667-10.133 4.667-15.2 0S88.667-.667 83.6 4 73.467 8.667 68.4 4 58.267-.667 53.2 4 43.067 8.667 38 4 27.867-.667 22.8 4 12.667 8.667 7.6 4-2.533-.667-7.6 4s-10.133 4.667-15.2 0S-32.933-.667-38 4s-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133 4.667-15.2 0-10.133 4.667-15.2 0-10.133 4.667-15.2 0" stroke="#E1E3E1" stroke-linecap="square"></path></g></pattern><rect width="100%" height="100%" fill="url(#a)"></rect></svg></div>`;
+    html += `<div class="squiggle"><svg aria-hidden="true" width="100%" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><pattern id="a" width="91" height="8" patternUnits="userSpaceOnUse"><g clip-path="url(#clip0_2426_11367)"><path d="M114 4c-5.067 4.667-10.133 4.667-15.2 0S88.667-.667 83.6 4 73.467 8.667 68.4 4 58.267-.667 53.2 4 43.067 8.667 38 4 27.867-.667 22.8 4 12.667 8.667 7.6 4-2.533-.667-7.6 4s-10.133 4.667-15.2 0S-32.933-.667-38 4s-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133 4.667-15.2 0" stroke="#E1E3E1" stroke-linecap="square"></path></g></pattern><rect width="100%" height="100%" fill="url(#a)"></rect></svg></div>`;
 
-    // 2. Timetables
-    if (data.timeSlotsForInfo && data.timeSlotsForInfo.length > 0) {
-        html += `<section class="info-card">`;
+    // 2. Opening Times (if separate section)
+    const timeSlots = data.timeSlotsForInfo || data.timeSlots;
+    if (timeSlots && timeSlots.length > 0) {
+        html += `<section class="info-section">`;
+        html += `<h2 class="info-title">${t('info.openingHours')}</h2>`;
+        html += `<div class="menu-items">`; // Start card container
 
-        data.timeSlotsForInfo.forEach((slot, index) => {
-            const title = lang === 'it' ? slot.label_it : slot.label_en;
-            const marginTop = index > 0 ? 'margin-top: 16px;' : '';
+        timeSlots.forEach(slot => {
+            const label = lang === 'it' ? slot.label_it : slot.label_en;
 
-            if (slot.collapsedSchedule && slot.collapsedSchedule.length > 0) {
-                html += `<h3 class="info-title" style="${marginTop}">${escapeHTML(title)}</h3><div class="timetable-grid">`;
-                slot.collapsedSchedule.forEach(sched => {
-                    const days = lang === 'it' ? sched.days_it : sched.days_en;
+            // Render as a "menu item" card
+            html += `
+                <article class="menu-item timeslot-card">
+                    <div class="item-header">
+                        <h3 class="item-name">${escapeHTML(label)}</h3>
+                    </div>
+            `;
+
+            if (slot.collapsedSchedule) {
+                html += `<div class="timetable-grid" style="margin-top: 8px;">`;
+                slot.collapsedSchedule.forEach(range => {
+                    const days = lang === 'it' ? range.days_it : range.days_en;
                     html += `
                         <div class="time-row">
                             <span class="time-days">${escapeHTML(days)}</span>
-                            <span class="time-hours">${escapeHTML(sched.times)}</span>
-                        </div>`;
+                            <span class="time-hours">${escapeHTML(range.times)}</span>
+                        </div>
+                    `;
                 });
                 html += `</div>`;
             }
+
+            html += `</article>`;
         });
 
+        html += `</div>`; // End card container
         html += `</section>`;
     }
 
@@ -410,6 +424,41 @@ function renderInfoPage() {
                     </a>
                 `;
             });
+        }
+
+        html += `</section>`;
+    }
+
+    html += `<div class="squiggle"><svg aria-hidden="true" width="100%" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><pattern id="a" width="91" height="8" patternUnits="userSpaceOnUse"><g clip-path="url(#clip0_2426_11367)"><path d="M114 4c-5.067 4.667-10.133 4.667-15.2 0S88.667-.667 83.6 4 73.467 8.667 68.4 4 58.267-.667 53.2 4 43.067 8.667 38 4 27.867-.667 22.8 4 12.667 8.667 7.6 4-2.533-.667-7.6 4s-10.133 4.667-15.2 0S-32.933-.667-38 4s-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133 4.667-15.2 0" stroke="#E1E3E1" stroke-linecap="square"></path></g></pattern><rect width="100%" height="100%" fill="url(#a)"></rect></svg></div>`;
+
+    // 4. Legal / Footer Links
+    const privacyPage = config?.pages?.privacyCookiePolicy;
+    const allergensPage = config?.pages?.allergens;
+
+    if (privacyPage || allergensPage) {
+        html += `<section class="info-section contacts-section" style="margin-top: 24px;">`;
+        html += `<h2 class="info-title">${t('info.legal')}</h2>`;
+
+        if (privacyPage) {
+            const label = tConfig(privacyPage.title, 'Privacy Policy');
+            const url = `pages/${lang}/${privacyPage.slug}.html`;
+            html += `
+                <a href="${url}" class="contact-row">
+                    <span class="fluent-icon" aria-hidden="true">&#xf4a2;</span>
+                    ${escapeHTML(label)}
+                </a>
+            `;
+        }
+
+        if (allergensPage) {
+            const label = tConfig(allergensPage.title, 'Allergens');
+            const url = `pages/${lang}/${allergensPage.slug}.html`;
+            html += `
+                <a href="${url}" class="contact-row">
+                    <span class="fluent-icon" aria-hidden="true">&#xf4f8;</span>
+                    ${escapeHTML(label)}
+                </a>
+            `;
         }
 
         html += `</section>`;
@@ -650,23 +699,47 @@ function getUpcomingSlots(now) {
             const openMinutes = parseTimeToMinutes(sched.open);
             const closeMinutes = parseTimeToMinutes(sched.close);
 
-            if (closeMinutes > currentMinutes || closeMinutes < openMinutes) {
-                if (openMinutes <= currentMinutes && currentMinutes < closeMinutes) {
-                    upcoming.push({
-                        label,
-                        status: 'active',
-                        isKitchen: slot.isKitchen,
-                        minutesUntil: 0
-                    });
+            // Determine if slot crosses midnight
+            const crossesMidnight = closeMinutes < openMinutes;
+            let isActive = false;
+            let isUpcoming = false;
+
+            if (crossesMidnight) {
+                // Active if: current >= open OR current < close
+                if (currentMinutes >= openMinutes || currentMinutes < closeMinutes) {
+                    isActive = true;
                 }
-                else if (openMinutes > currentMinutes) {
-                    upcoming.push({
-                        label,
-                        status: 'upcoming',
-                        isKitchen: slot.isKitchen,
-                        minutesUntil: openMinutes - currentMinutes
-                    });
+                // Upcoming if: current < open AND current >= close (to avoid detecting 'past' part of early morning as upcoming)
+                // Actually, if it closes at 02:00 and now is 10:00, it is upcoming for 22:00.
+                else if (currentMinutes < openMinutes && currentMinutes >= closeMinutes) {
+                    isUpcoming = true;
                 }
+            } else {
+                // Standard slot
+                if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+                    isActive = true;
+                } else if (currentMinutes < openMinutes) {
+                    isUpcoming = true;
+                }
+            }
+
+            if (isActive) {
+                upcoming.push({
+                    label,
+                    status: 'active',
+                    isKitchen: slot.isKitchen,
+                    minutesUntil: 0
+                });
+            } else if (isUpcoming) {
+                // Calculate minutes until open
+                let minUntil = openMinutes - currentMinutes;
+                //(No special adjustment needed for cross-midnight upcoming, as open > current)
+                upcoming.push({
+                    label,
+                    status: 'upcoming',
+                    isKitchen: slot.isKitchen,
+                    minutesUntil: minUntil
+                });
             }
         }
     }

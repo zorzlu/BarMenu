@@ -39,14 +39,21 @@ export function savePreferences(state) {
  * Get initial language from URL or preferences
  */
 export function getInitialLanguage() {
+    // 1. URL Param
     const urlParams = new URLSearchParams(window.location.search);
     const urlLang = urlParams.get('lang');
-    if (urlLang && ['en', 'it'].includes(urlLang)) return urlLang;
+    if (urlLang) return urlLang.toLowerCase();
 
+    // 2. Saved Preferences
     const prefs = loadPreferences();
     if (prefs?.language) return prefs.language;
 
-    return 'it'; // Default to Italian
+    // 3. Browser Language
+    if (navigator.language) {
+        return navigator.language.slice(0, 2).toLowerCase();
+    }
+
+    return undefined; // main.js will use config default
 }
 
 // Initial state object
@@ -56,7 +63,15 @@ export const state = {
     currentTab: 'kitchen',
     currentLanguage: getInitialLanguage(),
     config: null,
-    data: { kitchen: null, bar: null, info: null },
+    data: {
+        kitchen: null,
+        bar: null,
+        info: {
+            timeSlotsForHero: [],
+            timeSlotsForInfo: [],
+            contentItems: []
+        }
+    },
     lastFetch: { kitchen: null, bar: null, info: null },
     filters: {
         diet: savedPrefs?.diet || 'all',

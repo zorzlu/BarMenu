@@ -41,6 +41,10 @@
         "inMinutes": "tra {minutes} min",
         "inHours": "tra {hours}h"
     },
+    "info": {
+        "openingHours": "Orari Apertura",
+        "legal": "Note Legali"
+    },
     "menu": {
         "allergenFooter": "Hai allergie o intolleranze? Per la lista completa degli allergeni e informazioni sulle contaminazioni crociate chiedi al personale.",
         "allergenMoreInfo": "Maggiori info"

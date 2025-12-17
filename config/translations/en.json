@@ -41,6 +41,10 @@
         "inMinutes": "in {minutes} min",
         "inHours": "in {hours}h"
     },
+    "info": {
+        "openingHours": "Opening Hours",
+        "legal": "Legal"
+    },
     "menu": {
         "allergenFooter": "Have allergies or intolerances? For the complete list of allergens and cross-contamination info, please ask staff.",
         "allergenMoreInfo": "More info"

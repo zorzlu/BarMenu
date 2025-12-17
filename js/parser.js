@@ -95,6 +95,7 @@ export function parseCSV(text) {
  * Parse unified CSV with horizontal marker row structure
  */
 export function parseUnifiedCSV(text) {
+    if (!text) return { bar: [], kitchen: [], timeslots: [], content: [], categories: [] };
     const cleanText = text.replace(/^\uFEFF/, '');
     const rows = [];
     let currentRow = [];
@@ -358,10 +359,11 @@ export function processTimeslotsData(rawData) {
 
         const slot = timeSlotsMap.get(slotId);
         if (row.open && row.close) {
+            const fmt = state.config?.app?.csvNumberFormat || 'us';
             slot.schedule.push({
                 day: dayNum,
-                open: parseTimeValue(row.open),
-                close: parseTimeValue(row.close)
+                open: parseTimeValue(row.open, fmt),
+                close: parseTimeValue(row.close, fmt)
             });
         }
     });

@@ -18,7 +18,9 @@ import {
     openFilterModal,
     closeFilterModal,
     announceToSR,
-    updateThemeColor
+    updateThemeColor,
+    updateHeroContent,
+    syncModalToState
 } from './render.js';
 
 // Scroll threshold for header collapse
@@ -42,6 +44,23 @@ async function loadConfig() {
     } catch (e) {
         console.error('Failed to load config:', e);
         if (elements.storeName) elements.storeName.textContent = 'Configuration Error';
+    }
+}
+
+function validateAndSetLanguage() {
+    const config = state.config;
+    if (!config || !config.i18n) return;
+
+    const supported = config.i18n.supportedLanguages || [];
+    const defaultLang = config.i18n.defaultLanguage || 'en';
+    let current = state.currentLanguage;
+
+    // If undefined or not in supported list, fallback to default
+    if (!current || !supported.includes(current)) {
+        console.warn(`Language '${current}' not supported. Using default: ${defaultLang}`);
+        state.currentLanguage = defaultLang;
+        // Don't save preference here to avoid overwriting user's actual preference 
+        // with a fallback if they just happen to visit from an unsupported locale
     }
 }
 
@@ -213,17 +232,23 @@ function applyFiltersFromModal() {
     announceToSR(t('filters.filters') + ' ' + t('ui.apply').toLowerCase());
 }
 
-function clearAllFilters() {
+// Clear filters inside the modal: Visual update only, waiting for "Apply"
+function clearFiltersInModal() {
     state.tempFilters.diet = 'all';
     state.tempFilters.excludeAllergens = [];
-    // syncModalToState is inside render.js but we need to call it if modal is open, 
-    // but usually clearAllFilters is called from inline button or modal button.
-    // If called from modal, we should update UI.
+    syncModalToState();
+}
 
-    // We'll reset both temp and actual to be safe for both contexts
+// Clear filters immediately (e.g. from an inline chip removal): Commits and renders
+function clearFiltersImmediate() {
     state.filters.diet = 'all';
     state.filters.excludeAllergens = [];
 
+    // Also reset temp to keep in sync
+    state.tempFilters.diet = 'all';
+    state.tempFilters.excludeAllergens = [];
+
+    syncModalToState();
     updateActiveFilterDisplay();
     render();
     savePreferences(state);
@@ -233,10 +258,13 @@ function clearAllFilters() {
 async function init() {
     try {
         await loadConfig();
+        validateAndSetLanguage();
         await loadTranslations();
 
-        updateUILanguage();
+        // Render static content IMMEDIATELY (logos, colors, etc.)
         updateThemeColor();
+        updateHeroContent();
+        updateUILanguage(); // Updates data-i18n texts
         updateActiveFilterDisplay();
 
         updateKitchenStatus();
@@ -301,9 +329,9 @@ if (elements.staleRetryButton) {
 elements.filterTrigger.addEventListener('click', openFilterModal);
 elements.modalClose.addEventListener('click', closeFilterModal);
 elements.applyFilters.addEventListener('click', applyFiltersFromModal);
-elements.clearFilters.addEventListener('click', clearAllFilters);
+elements.clearFilters.addEventListener('click', clearFiltersInModal);
 if (elements.inlineClearFilters) {
-    elements.inlineClearFilters.addEventListener('click', clearAllFilters);
+    elements.inlineClearFilters.addEventListener('click', clearFiltersImmediate);
 }
 
 elements.dietOptions.forEach(btn => {
