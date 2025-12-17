@@ -1,17 +1,31 @@
 {
     "app": {
         "name": "Il Tuo Bar",
-        "logoUrl": "assets/images/iltuobarlogo.png",
+        "heroLogo": "assets/images/iltuobarlogo.png",
+        "navbarLogo": "assets/images/iltuobar_navbar_icon.png",
         "accentColor": "#A6507E",
         "theme-color": "#A6507E",
         "theme": "light",
         "fontFamily": "Inter, sans-serif",
-        "claim": "Simply the best",
+        "claim": {
+            "it": "Semplicemente il migliore",
+            "en": "Simply the best"
+        },
         "csvLanguage": "it",
         "csvNumberFormat": "it"
     },
+    "page": {
+        "title": {
+            "it": "Menu del Giorno",
+            "en": "Daily Menu"
+        },
+        "description": {
+            "it": "Menu del giorno - Scopri i nostri piatti e le nostre specialità",
+            "en": "Daily menu - Discover our dishes and specialties"
+        }
+    },
     "seo": {
-        "baseUrl": "https://zorzlu.github.io/BarMenu/",
+        "baseUrl": "https://zorzlu.github.io/BarMenu",
         "searchEngineIndexing": false
     },
     "i18n": {
@@ -165,12 +179,12 @@
             "class": ""
         },
         "vegetarian": {
-            "labelKey": "dietVegetarian",
+            "labelKey": "filters.dietVegetarian",
             "icon": "🌿",
             "class": "vegetarian"
         },
         "vegan": {
-            "labelKey": "dietVegan",
+            "labelKey": "filters.dietVegan",
             "icon": "🌱",
             "class": "vegan"
         }

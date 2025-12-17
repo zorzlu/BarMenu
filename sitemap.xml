@@ -1,33 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://zorzlu.github.io/BarMenu//</loc>
+    <loc>https://zorzlu.github.io/BarMenu/?lang=en</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zorzlu.github.io/BarMenu/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://zorzlu.github.io/BarMenu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zorzlu.github.io/BarMenu/"/>
   </url>
   <url>
-    <loc>https://zorzlu.github.io/BarMenu//pages/it/privacy-cookie-policy.html</loc>
+    <loc>https://zorzlu.github.io/BarMenu/</loc>
+    <lastmod>2025-12-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zorzlu.github.io/BarMenu/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://zorzlu.github.io/BarMenu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zorzlu.github.io/BarMenu/"/>
+  </url>
+  <url>
+    <loc>https://zorzlu.github.io/BarMenu/pages/en/privacy-cookie-policy.html</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zorzlu.github.io/BarMenu/pages/en/privacy-cookie-policy.html"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://zorzlu.github.io/BarMenu/pages/it/privacy-cookie-policy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zorzlu.github.io/BarMenu/pages/it/privacy-cookie-policy.html"/>
   </url>
   <url>
-    <loc>https://zorzlu.github.io/BarMenu//pages/en/privacy-cookie-policy.html</loc>
+    <loc>https://zorzlu.github.io/BarMenu/pages/it/privacy-cookie-policy.html</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zorzlu.github.io/BarMenu/pages/en/privacy-cookie-policy.html"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://zorzlu.github.io/BarMenu/pages/it/privacy-cookie-policy.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zorzlu.github.io/BarMenu/pages/it/privacy-cookie-policy.html"/>
   </url>
   <url>
-    <loc>https://zorzlu.github.io/BarMenu//pages/it/allergens.html</loc>
+    <loc>https://zorzlu.github.io/BarMenu/pages/en/allergens.html</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zorzlu.github.io/BarMenu/pages/en/allergens.html"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://zorzlu.github.io/BarMenu/pages/it/allergens.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zorzlu.github.io/BarMenu/pages/it/allergens.html"/>
   </url>
   <url>
-    <loc>https://zorzlu.github.io/BarMenu//pages/en/allergens.html</loc>
+    <loc>https://zorzlu.github.io/BarMenu/pages/it/allergens.html</loc>
     <lastmod>2025-12-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://zorzlu.github.io/BarMenu/pages/en/allergens.html"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://zorzlu.github.io/BarMenu/pages/it/allergens.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://zorzlu.github.io/BarMenu/pages/it/allergens.html"/>
   </url>
 </urlset>

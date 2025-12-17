@@ -41,6 +41,10 @@
         "inMinutes": "in {minutes} min",
         "inHours": "in {hours}h"
     },
+    "menu": {
+        "allergenFooter": "Have allergies or intolerances? For the complete list of allergens and cross-contamination info, please ask staff.",
+        "allergenMoreInfo": "More info"
+    },
     "status": {
         "errorMessage": "Menu unavailable.",
         "staleDataMessage": "Data may be outdated. Some dishes might not be available."

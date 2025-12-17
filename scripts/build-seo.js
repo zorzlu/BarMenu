@@ -87,26 +87,69 @@ function generateRobotsTxt(baseUrl, allowIndexing) {
 function generateSitemapXml(baseUrl, lastmod, config) {
     const privacySlug = config.pages?.privacyCookiePolicy?.slug || 'privacy-cookie-policy';
     const allergensSlug = config.pages?.allergens?.slug || 'allergens';
+    const defaultLang = config.i18n?.defaultLanguage || 'it';
+    const supportedLangs = config.i18n?.supportedLanguages || ['en', 'it'];
 
-    const pages = [
-        { loc: '/', priority: '1.0', changefreq: 'daily' },
-        { loc: `/pages/it/${privacySlug}.html`, priority: '0.5', changefreq: 'monthly' },
-        { loc: `/pages/en/${privacySlug}.html`, priority: '0.5', changefreq: 'monthly' },
-        { loc: `/pages/it/${allergensSlug}.html`, priority: '0.6', changefreq: 'monthly' },
-        { loc: `/pages/en/${allergensSlug}.html`, priority: '0.6', changefreq: 'monthly' },
+    // Define page groups (pages with language variants)
+    const pageGroups = [
+        {
+            type: 'main',
+            urls: {
+                'it': '/',
+                'en': '/?lang=en'
+            },
+            priority: '1.0',
+            changefreq: 'daily'
+        },
+        {
+            type: 'static',
+            urls: {
+                'it': `/pages/it/${privacySlug}.html`,
+                'en': `/pages/en/${privacySlug}.html`
+            },
+            priority: '0.5',
+            changefreq: 'monthly'
+        },
+        {
+            type: 'static',
+            urls: {
+                'it': `/pages/it/${allergensSlug}.html`,
+                'en': `/pages/en/${allergensSlug}.html`
+            },
+            priority: '0.6',
+            changefreq: 'monthly'
+        }
     ];
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n';
+    xml += '        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n';
 
-    for (const page of pages) {
-        const fullUrl = baseUrl + page.loc;
-        xml += '  <url>\n';
-        xml += `    <loc>${fullUrl}</loc>\n`;
-        xml += `    <lastmod>${lastmod}</lastmod>\n`;
-        xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-        xml += `    <priority>${page.priority}</priority>\n`;
-        xml += '  </url>\n';
+    for (const group of pageGroups) {
+        // Generate a <url> entry for each language variant
+        for (const lang of supportedLangs) {
+            if (!group.urls[lang]) continue;
+
+            const fullUrl = baseUrl + group.urls[lang];
+            xml += '  <url>\n';
+            xml += `    <loc>${fullUrl}</loc>\n`;
+            xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += `    <changefreq>${group.changefreq}</changefreq>\n`;
+            xml += `    <priority>${group.priority}</priority>\n`;
+
+            // Add hreflang links for all language variants
+            for (const altLang of supportedLangs) {
+                if (group.urls[altLang]) {
+                    const altUrl = baseUrl + group.urls[altLang];
+                    xml += `    <xhtml:link rel="alternate" hreflang="${altLang}" href="${altUrl}"/>\n`;
+                }
+            }
+            // Add x-default pointing to default language
+            const defaultUrl = baseUrl + group.urls[defaultLang];
+            xml += `    <xhtml:link rel="alternate" hreflang="x-default" href="${defaultUrl}"/>\n`;
+
+            xml += '  </url>\n';
+        }
     }
 
     xml += '</urlset>\n';

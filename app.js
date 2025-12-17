@@ -127,7 +127,7 @@ const elements = {
     emptyState: document.getElementById('emptyState'),
     menuContainer: document.getElementById('menuContainer'),
     infoContainer: document.getElementById('infoContainer'),
-    storeLogo: document.getElementById('storeLogo'),
+    navbarLogo: document.getElementById('navbarLogo'),
     storeName: document.getElementById('storeName'),
     navItems: document.querySelectorAll('.nav-item'),
     // Welcome hero elements (background layer)
@@ -180,7 +180,6 @@ function t(key) {
     const lang = state.currentLanguage;
     const fallback = state.config?.i18n?.fallbackLanguage || 'en';
 
-    // Try current language, then fallback (supports nested keys like 'ui.loading')
     return getNestedValue(TRANSLATIONS[lang], key)
         || getNestedValue(TRANSLATIONS[fallback], key)
         || key;
@@ -194,6 +193,14 @@ function tAllergen(key) {
     return TRANSLATIONS[lang]?.allergens?.[key]
         || TRANSLATIONS[fallback]?.allergens?.[key]
         || key;
+}
+
+// Helper to get localized value from config objects like { "it": "...", "en": "..." }
+function tConfig(obj, defaultValue = '') {
+    if (!obj || typeof obj !== 'object') return obj || defaultValue;
+    const lang = state.currentLanguage;
+    const fallback = state.config?.i18n?.fallbackLanguage || 'en';
+    return obj[lang] || obj[fallback] || defaultValue;
 }
 
 function formatPrice(price) {
@@ -220,6 +227,24 @@ function formatPrice(price) {
 
 function updateUILanguage() {
     const lang = state.currentLanguage;
+    const config = state.config;
+
+    // Update page title (from config.page.title)
+    const pageTitle = tConfig(config?.page?.title, 'Menu');
+    document.title = pageTitle;
+
+    // Update meta description (from config.page.description)
+    const pageDesc = tConfig(config?.page?.description, '');
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && pageDesc) {
+        metaDesc.setAttribute('content', pageDesc);
+    }
+
+    // Update hero claim (from config.app.claim)
+    const claim = tConfig(config?.app?.claim, '');
+    if (elements.heroClaim && claim) {
+        elements.heroClaim.textContent = claim;
+    }
 
     // Update all elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -252,8 +277,8 @@ function updateUILanguage() {
 
 // Switch language using History API (no page refresh)
 function switchLanguage(newLang) {
-    const defaultLang = state.config?.i18n?.defaultLanguage || 'it';
-    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en', 'it'];
+    const defaultLang = state.config?.i18n?.defaultLanguage || 'en';
+    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en'];
 
     // Validate language
     if (!supportedLangs.includes(newLang)) {
@@ -278,8 +303,8 @@ window.addEventListener('popstate', (event) => {
     // Read language from URL after navigation
     const urlParams = new URLSearchParams(window.location.search);
     const urlLang = urlParams.get('lang');
-    const defaultLang = state.config?.i18n?.defaultLanguage || 'it';
-    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en', 'it'];
+    const defaultLang = state.config?.i18n?.defaultLanguage || 'en';
+    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en'];
 
     // Determine language: URL param or default
     let newLang = defaultLang;
@@ -1305,6 +1330,16 @@ function render() {
         html += '</div></section>';
     });
 
+    // Add allergen info footer
+    const allergensSlug = state.config?.pages?.allergens?.slug || 'allergens';
+    const allergensPage = `pages/${lang}/${allergensSlug}.html`;
+    html += `
+        <div class="allergen-info-footer">
+            <p>${t('menu.allergenFooter')}</p>
+            <a href="${allergensPage}" class="allergen-info-link">${t('menu.allergenMoreInfo')}</a>
+        </div>
+    `;
+
     elements.menuContainer.innerHTML = html;
 }
 
@@ -1662,24 +1697,37 @@ function toggleHeader() {
 
 function updateHeroContent() {
     const config = state.config;
+    const lang = state.currentLanguage;
 
-    // Show welcome hero with static app name from config (same for ALL pages)
-    const appName = config?.app?.name || 'Benvenuto';
-    const logoUrl = config?.app?.logoUrl;
+    // App name (used for alt text, not displayed as title)
+    const appName = config?.app?.name || 'Menu';
 
-    // Update hero content - static, same for all pages including info
-    // elements.heroTitle.textContent = appName; (Removed: element no longer exists)
-    if (elements.heroClaim && config?.app?.claim) {
-        elements.heroClaim.textContent = config.app.claim;
+    // Localized claim
+    const claim = tConfig(config?.app?.claim, '');
+    if (elements.heroClaim && claim) {
+        elements.heroClaim.textContent = claim;
     }
-    // heroText uses data-i18n="welcomeMessage", will be updated by updateUILanguage()
 
-    // Show hero logo if available
-    if (logoUrl) {
-        elements.heroLogo.src = logoUrl;
+    // Hero logo with proper alt text (bar name)
+    const heroLogoUrl = config?.app?.heroLogo;
+    if (heroLogoUrl) {
+        elements.heroLogo.src = heroLogoUrl;
+        elements.heroLogo.alt = appName; // a11y: alt = bar name
         elements.heroLogo.hidden = false;
     } else {
         elements.heroLogo.hidden = true;
+    }
+
+    // Navbar logo (decorative, alt="" since text is adjacent)
+    const navbarLogoUrl = config?.app?.navbarLogo;
+    if (elements.navbarLogo && navbarLogoUrl) {
+        elements.navbarLogo.src = navbarLogoUrl;
+        elements.navbarLogo.hidden = false;
+    }
+
+    // Update store name in navbar
+    if (elements.storeName) {
+        elements.storeName.textContent = appName;
     }
 
     elements.welcomeHero.classList.remove('hidden');
@@ -1898,15 +1946,6 @@ elements.navItems.forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.target));
 });
 
-// Language Toggle
-elements.langSwitch.addEventListener('click', () => {
-    state.currentLanguage = state.currentLanguage === 'it' ? 'en' : 'it';
-    document.documentElement.lang = state.currentLanguage;
-    updateUILanguage();
-    savePreferences();
-    announceToSR(state.currentLanguage === 'it' ? 'Italiano' : 'English');
-});
-
 // Retry Button (error banner)
 elements.retryButton.addEventListener('click', () => fetchUnifiedData(true));
 
@@ -1976,9 +2015,10 @@ window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
 async function init() {
     try {
-        // Load translations and config first
-        await loadTranslations();
+        // Load config first (needed for i18n.fallbackLanguage)
         await loadConfig();
+        // Then load translations (uses config for fallback language)
+        await loadTranslations();
 
         // Update UI with translations while loading data
         updateUILanguage();

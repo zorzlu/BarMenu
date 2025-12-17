@@ -41,6 +41,10 @@
         "inMinutes": "tra {minutes} min",
         "inHours": "tra {hours}h"
     },
+    "menu": {
+        "allergenFooter": "Hai allergie o intolleranze? Per la lista completa degli allergeni e informazioni sulle contaminazioni crociate chiedi al personale.",
+        "allergenMoreInfo": "Maggiori info"
+    },
     "status": {
         "errorMessage": "Menu non disponibile.",
         "staleDataMessage": "Dati potrebbero non essere aggiornati. Alcuni piatti potrebbero non essere disponibili."
