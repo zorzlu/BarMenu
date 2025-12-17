@@ -107,7 +107,7 @@ function generatePageHtml(content, pageConfig, translations) {
     const backLabel = translations?.[lang]?.staticPages?.backToMenu || (isEnglish ? 'Back to Menu' : 'Torna al Menu');
     const langLabel = isEnglish ? '🇮🇹' : '🇬🇧';
     const otherLang = isEnglish ? 'it' : 'en';
-    const pageFile = `${slug}.html`;
+    const pageFile = `${slug}`;
 
     // Generate hreflang URLs
     const itUrl = `${baseUrl}/pages/it/${pageFile}`;
@@ -122,6 +122,7 @@ function generatePageHtml(content, pageConfig, translations) {
     <meta name="description" content="${description}">
     <meta name="theme-color" content="#ffffff">
     <title>${title}</title>
+    <link rel="icon" type="image/png" href="../../assets/images/iltuobar_favicon.png">
     
     <!-- Canonical and Hreflang -->
     <link rel="canonical" href="${canonicalUrl}">
@@ -136,7 +137,7 @@ function generatePageHtml(content, pageConfig, translations) {
 <body>
     <header class="page-header">
         <div class="page-header-content">
-            <a href="../../index.html" class="back-button">
+            <a href="../../" class="back-button">
                 <span class="back-arrow">←</span>
                 ${backLabel}
             </a>
@@ -152,7 +153,7 @@ function generatePageHtml(content, pageConfig, translations) {
         </article>
         
         <div class="footer-cta">
-            <a href="../../index.html" class="cta-button">
+            <a href="../../" class="cta-button">
                 <span>←</span>
                 ${backLabel}
             </a>
