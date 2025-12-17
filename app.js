@@ -15,7 +15,7 @@ let CONFIG = {
 
 async function loadTranslations() {
     try {
-        const response = await fetch('translations.json?t=' + Date.now());
+        const response = await fetch('config/translations.json?t=' + Date.now());
         TRANSLATIONS = await response.json();
     } catch (e) {
         console.error('Could not load translations:', e);
@@ -812,7 +812,7 @@ function applyFiltersToData(categories) {
 
 async function loadConfig() {
     try {
-        const response = await fetch('config.json?t=' + Date.now());
+        const response = await fetch('config/config.json?t=' + Date.now());
         if (!response.ok) throw new Error('Config load failed');
         state.config = await response.json();
         applyConfig();
@@ -881,7 +881,7 @@ async function fetchUnifiedData(isRefresh = true) {
 
         // Fallback to local fallback_data.csv
         if (!text) {
-            response = await fetch(`./fallback_data.csv?t=${Date.now()}`);
+            response = await fetch(`./config/fallback_data.csv?t=${Date.now()}`);
             if (!response.ok) throw new Error(`Fallback file not found: ${response.status}`);
             text = await response.text();
         }
@@ -1314,7 +1314,7 @@ function renderInfoPage() {
             config.contact.socials.forEach(social => {
                 let iconHtml = '';
                 if (social.name.toLowerCase() === 'instagram') {
-                    iconHtml = `<img src="icons/Instagram_Glyph_Black.svg" alt="" class="social-icon" aria-hidden="true">`;
+                    iconHtml = `<img src="assets/icons/Instagram_Glyph_Black.svg" alt="" class="social-icon" aria-hidden="true">`;
                 } else {
                     iconHtml = `<span class="fluent-icon" aria-hidden="true">&#xf583;</span>`;
                 }

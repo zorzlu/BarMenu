@@ -3,8 +3,11 @@
     "@material/material-color-utilities": "^0.3.0"
   },
   "scripts": {
-    "generate-theme": "node generate_colors.js",
-    "build-pages": "node build-pages.js",
+    "generate-theme": "node scripts/generate-colors.js",
+    "build-pages": "node scripts/build-pages.js",
+    "build-seo": "node scripts/build-seo.js",
+    "build": "npm run generate-theme && npm run build-pages && npm run build-seo",
+    "dev": "python -m http.server 8080",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

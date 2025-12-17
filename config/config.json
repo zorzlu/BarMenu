@@ -1,7 +1,7 @@
 {
     "app": {
         "name": "Il Tuo Bar",
-        "logoUrl": "iltuobarlogo.png",
+        "logoUrl": "assets/images/iltuobarlogo.png",
         "accentColor": "#A6507E",
         "theme-color": "#A6507E",
         "theme": "light",
@@ -9,6 +9,42 @@
         "claim": "Simply the best",
         "csvLanguage": "it",
         "csvNumberFormat": "it"
+    },
+    "seo": {
+        "baseUrl": "https://zorzlu.github.io/ScomodoMenu",
+        "searchEngineIndexing": false
+    },
+    "legal": {
+        "companyName": "Il Tuo Bar S.r.l.",
+        "vatNumber": "IT12345678901",
+        "address": "Via Roma 123, 00100 Roma",
+        "email": "privacy@iltuobar.com",
+        "phone": "+39 06 12345678",
+        "lastUpdated": "2024-12-17"
+    },
+    "pages": {
+        "privacyCookiePolicy": {
+            "slug": "privacy-cookie-policy",
+            "title": {
+                "it": "Privacy e Cookie Policy",
+                "en": "Privacy and Cookie Policy"
+            },
+            "description": {
+                "it": "Informativa sulla privacy e sui cookie per il menu digitale",
+                "en": "Privacy and cookie policy for the digital menu"
+            }
+        },
+        "allergens": {
+            "slug": "allergens",
+            "title": {
+                "it": "Informazioni sugli Allergeni",
+                "en": "Allergen Information"
+            },
+            "description": {
+                "it": "Elenco dei 14 allergeni regolamentati dall'UE e come leggerli nel menu",
+                "en": "List of 14 EU regulated allergens and how to read them in the menu"
+            }
+        }
     },
     "regional": {
         "locale": "it-IT",

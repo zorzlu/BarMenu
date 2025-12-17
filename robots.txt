@@ -1,0 +1,11 @@
+# Robots.txt for ScomodoMenu
+# https://zorzlu.github.io/ScomodoMenu
+#
+# Search engine indexing: DISABLED
+# To change this, edit config/config.json -> seo.searchEngineIndexing
+
+User-agent: *
+Disallow: /
+
+# Sitemap location
+Sitemap: https://zorzlu.github.io/ScomodoMenu/sitemap.xml

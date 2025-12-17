@@ -1,8 +1,10 @@
 const fs = require('fs');
+const path = require('path');
 const { Hct, SchemeTonalSpot, argbFromHex, hexFromArgb, TonalPalette } = require('@material/material-color-utilities');
 
-const CONFIG_PATH = './config.json';
-const OUTPUT_CSS_PATH = './colors.css';
+const ROOT_DIR = path.join(__dirname, '..');
+const CONFIG_PATH = path.join(ROOT_DIR, 'config/config.json');
+const OUTPUT_CSS_PATH = path.join(ROOT_DIR, 'assets/css/colors.css');
 
 // MD3 Token mapping
 const TOKENS = {

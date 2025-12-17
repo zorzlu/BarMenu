@@ -31,9 +31,9 @@ The system uses a **single spreadsheet** divided into horizontal sections.
     *   Choose **Comma-separated values (.csv)** as the format.
     *   Click **Publish** and copy the generated URL.
 
-### 2. Site Configuration (`config.json`)
+### 2. Site Configuration (`config/config.json`)
 
-Open the `config.json` file and update the main fields:
+Open the `config/config.json` file and update the main fields:
 
 ```json
 {
@@ -53,7 +53,7 @@ Open the `config.json` file and update the main fields:
 }
 ```
 
-> 💡 **Note**: If `urls.menu` is empty or invalid, the site will automatically use the local `fallback_data.csv` file.
+> 💡 **Note**: If `urls.menu` is empty or invalid, the site will automatically use the local `config/fallback_data.csv` file.
 
 ---
 
@@ -90,11 +90,23 @@ Add custom text or banners to the Info page and Menu tabs.
 ## Advanced Customization
 
 ### Icons & Colors
-*   Edit `colors.css` to change the color palette (based on Material 3 CSS variables).
-*   Allergen and diet icons are configurable in `config.json` under `allergens` and `foodTypes`.
+*   Edit `assets/css/colors.css` to change the color palette (based on Material 3 CSS variables).
+*   Allergen and diet icons are configurable in `config/config.json` under `allergens` and `foodTypes`.
 
 ### Translations
-Fixed UI strings (e.g., "Filters", "Close") are located in `translations.json`.
+Fixed UI strings (e.g., "Filters", "Close") are located in `config/translations.json`.
+
+### SEO
+The site includes `robots.txt` and `sitemap.xml` for search engine optimization, generated from `config/config.json`:
+
+```json
+"seo": {
+    "baseUrl": "https://your-domain.github.io/ScomodoMenu",
+    "searchEngineIndexing": false  // set to true to allow crawlers
+}
+```
+
+Run `npm run build-seo` to regenerate these files after changing the config.
 
 ---
 
