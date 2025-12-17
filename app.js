@@ -14,16 +14,32 @@ let CONFIG = {
 };
 
 async function loadTranslations() {
+    const lang = state.currentLanguage;
+    const fallbackLang = state.config?.i18n?.fallbackLanguage || 'en';
+
     try {
-        const response = await fetch('config/translations.json?t=' + Date.now());
-        TRANSLATIONS = await response.json();
+        // Load current language
+        const response = await fetch(`config/translations/${lang}.json?t=${Date.now()}`);
+        TRANSLATIONS[lang] = await response.json();
+
+        // Load fallback language if different
+        if (fallbackLang !== lang) {
+            const fallbackResponse = await fetch(`config/translations/${fallbackLang}.json?t=${Date.now()}`);
+            TRANSLATIONS[fallbackLang] = await fallbackResponse.json();
+        }
+
+        // Load CSV schema
+        const schemaResponse = await fetch(`config/csv-schema.json?t=${Date.now()}`);
+        const csvSchema = await schemaResponse.json();
+        const csvLang = state.config?.app?.csvLanguage || 'it';
+        // Store the CSV keywords for the configured CSV language
+        TRANSLATIONS.csvKeywords = csvSchema[csvLang] || csvSchema['it'];
+
     } catch (e) {
         console.error('Could not load translations:', e);
         // Fallback minimal translations
-        TRANSLATIONS = {
-            it: { loading: 'Caricamento...', errorMessage: 'Errore', allergens: {} },
-            en: { loading: 'Loading...', errorMessage: 'Error', allergens: {} }
-        };
+        TRANSLATIONS[lang] = { loading: 'Loading...', errorMessage: 'Error', allergens: {} };
+        TRANSLATIONS[fallbackLang] = { loading: 'Loading...', errorMessage: 'Error', allergens: {} };
     }
 }
 
@@ -62,12 +78,24 @@ function savePreferences() {
 // State
 // ========================================
 
+// Get language from URL param first, then saved preferences, then default
+function getInitialLanguage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlLang = urlParams.get('lang');
+    if (urlLang && ['en', 'it'].includes(urlLang)) return urlLang;
+
+    const prefs = loadPreferences();
+    if (prefs?.language) return prefs.language;
+
+    return 'it'; // Default to Italian
+}
+
 // Load saved preferences
 const savedPrefs = loadPreferences();
 
 let state = {
     currentTab: 'kitchen',
-    currentLanguage: savedPrefs?.language || 'it',
+    currentLanguage: getInitialLanguage(),
     config: null,
     data: { kitchen: null, bar: null, info: null },
     lastFetch: { kitchen: null, bar: null, info: null },
@@ -136,14 +164,36 @@ const elements = {
 // Translation Helper
 // ========================================
 
+// Helper to get nested value from object using dot notation
+function getNestedValue(obj, path) {
+    if (!obj || !path) return undefined;
+    const keys = path.split('.');
+    let result = obj;
+    for (const key of keys) {
+        result = result?.[key];
+        if (result === undefined) return undefined;
+    }
+    return result;
+}
+
 function t(key) {
     const lang = state.currentLanguage;
-    return TRANSLATIONS[lang][key] || TRANSLATIONS['it'][key] || key;
+    const fallback = state.config?.i18n?.fallbackLanguage || 'en';
+
+    // Try current language, then fallback (supports nested keys like 'ui.loading')
+    return getNestedValue(TRANSLATIONS[lang], key)
+        || getNestedValue(TRANSLATIONS[fallback], key)
+        || key;
 }
 
 function tAllergen(key) {
     const lang = state.currentLanguage;
-    return TRANSLATIONS[lang].allergens[key] || TRANSLATIONS['it'].allergens[key] || key;
+    const fallback = state.config?.i18n?.fallbackLanguage || 'en';
+
+    // Allergens are in the 'allergens' category
+    return TRANSLATIONS[lang]?.allergens?.[key]
+        || TRANSLATIONS[fallback]?.allergens?.[key]
+        || key;
 }
 
 function formatPrice(price) {
@@ -181,14 +231,14 @@ function updateUILanguage() {
     const langSwitch = elements.langSwitch;
     if (lang === 'it') {
         langSwitch.querySelector('.lang-flag').textContent = '🇬🇧';
-        langSwitch.setAttribute('aria-label', t('switchLang'));
+        langSwitch.setAttribute('aria-label', t('nav.switchLang'));
     } else {
         langSwitch.querySelector('.lang-flag').textContent = '🇮🇹';
-        langSwitch.setAttribute('aria-label', t('switchLang'));
+        langSwitch.setAttribute('aria-label', t('nav.switchLang'));
     }
 
     // Update modal close button aria-label
-    elements.modalClose.setAttribute('aria-label', t('close'));
+    elements.modalClose.setAttribute('aria-label', t('ui.close'));
 
     // Update active filter chips
     updateActiveFilterDisplay();
@@ -199,6 +249,50 @@ function updateUILanguage() {
     // Update theme color (in case language change affects theme/colors)
     updateThemeColor();
 }
+
+// Switch language using History API (no page refresh)
+function switchLanguage(newLang) {
+    const defaultLang = state.config?.i18n?.defaultLanguage || 'it';
+    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en', 'it'];
+
+    // Validate language
+    if (!supportedLangs.includes(newLang)) {
+        console.warn(`Unsupported language: ${newLang}`);
+        return;
+    }
+
+    // Update URL using History API (no refresh)
+    const newUrl = newLang === defaultLang ? '/' : `/?lang=${newLang}`;
+    history.pushState({ lang: newLang }, '', newUrl);
+
+    // Update state and save
+    state.currentLanguage = newLang;
+    savePreferences();
+
+    // Update UI
+    updateUILanguage();
+}
+
+// Handle browser back/forward button
+window.addEventListener('popstate', (event) => {
+    // Read language from URL after navigation
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlLang = urlParams.get('lang');
+    const defaultLang = state.config?.i18n?.defaultLanguage || 'it';
+    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en', 'it'];
+
+    // Determine language: URL param or default
+    let newLang = defaultLang;
+    if (urlLang && supportedLangs.includes(urlLang)) {
+        newLang = urlLang;
+    }
+
+    // Update state and UI if changed
+    if (state.currentLanguage !== newLang) {
+        state.currentLanguage = newLang;
+        updateUILanguage();
+    }
+});
 
 // ========================================
 // CSV Parser & Utilities
@@ -1391,8 +1485,8 @@ function updateActiveFilterDisplay() {
     // Diet chip
     if (diet !== 'all') {
         const dietInfo = diet === 'vegan'
-            ? { icon: '🌱', label: t('dietVegan'), class: '' }
-            : { icon: '🌿', label: t('dietVegetarian'), class: 'vegetarian' };
+            ? { icon: '🌱', label: t('filters.dietVegan'), class: '' }
+            : { icon: '🌿', label: t('filters.dietVegetarian'), class: 'vegetarian' };
 
         elements.dietChip.hidden = false;
         elements.dietChip.className = `filter-chip diet-chip ${dietInfo.class}`;
@@ -1406,7 +1500,7 @@ function updateActiveFilterDisplay() {
     if (excludeAllergens.length > 0) {
         elements.allergenChip.hidden = false;
         elements.allergenChip.querySelector('.chip-label').textContent =
-            `${excludeAllergens.length} ${t('allergensExcluded')}`;
+            `${excludeAllergens.length} ${t('filters.allergensExcluded')}`;
     } else {
         elements.allergenChip.hidden = true;
     }
@@ -1509,7 +1603,7 @@ function applyFiltersFromModal() {
     savePreferences();
 
     // Announce to screen readers
-    announceToSR(t('filters') + ' ' + t('apply').toLowerCase());
+    announceToSR(t('filters.filters') + ' ' + t('ui.apply').toLowerCase());
 }
 
 function clearAllFilters() {
@@ -1748,10 +1842,10 @@ function getUpcomingSlots(now) {
 // Format duration nicely
 function formatDuration(minutes) {
     if (minutes < 60) {
-        return t('inMinutes').replace('{minutes}', minutes);
+        return t('kitchen.inMinutes').replace('{minutes}', minutes);
     } else {
         const hours = Math.round(minutes / 60);
-        return t('inHours').replace('{hours}', hours);
+        return t('kitchen.inHours').replace('{hours}', hours);
     }
 }
 
@@ -1790,7 +1884,7 @@ function updateKitchenStatus() {
     if (parts.length > 0) {
         // Show "Prossimo oggi: X, Y" or just the active ones
         const hasActive = upcomingSlots.some(s => s.status === 'active');
-        const prefix = hasActive ? '' : t('nextToday') + ': ';
+        const prefix = hasActive ? '' : t('kitchen.nextToday') + ': ';
         elements.kitchenStatus.textContent = prefix + parts.join(' · ');
         elements.kitchenStatus.hidden = false;
     } else {
@@ -1955,5 +2049,13 @@ async function init() {
     });
 }
 
+// Language switch click handler
+elements.langSwitch.addEventListener('click', () => {
+    const defaultLang = state.config?.i18n?.defaultLanguage || 'it';
+    const newLang = state.currentLanguage === 'en' ? defaultLang : 'en';
+    switchLanguage(newLang);
+});
+
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
 else init();
+

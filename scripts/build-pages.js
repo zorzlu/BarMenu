@@ -101,10 +101,10 @@ function replaceTemplateVars(content, config) {
 }
 
 // HTML template generator
-function generatePageHtml(content, pageConfig) {
+function generatePageHtml(content, pageConfig, translations) {
     const { title, description, lang, slug, baseUrl } = pageConfig;
     const isEnglish = lang === 'en';
-    const backLabel = isEnglish ? 'Back to Menu' : 'Torna al Menu';
+    const backLabel = translations?.[lang]?.staticPages?.backToMenu || (isEnglish ? 'Back to Menu' : 'Torna al Menu');
     const langLabel = isEnglish ? '🇮🇹' : '🇬🇧';
     const otherLang = isEnglish ? 'it' : 'en';
     const pageFile = `${slug}.html`;
@@ -167,6 +167,7 @@ function build() {
     const rootDir = path.join(__dirname, '..');
     const contentDir = path.join(rootDir, 'content');
     const configPath = path.join(rootDir, 'config/config.json');
+    const translationsDir = path.join(rootDir, 'config/translations');
     const pagesDir = path.join(rootDir, 'pages');
     const enDir = path.join(pagesDir, 'en');
     const itDir = path.join(pagesDir, 'it');
@@ -178,6 +179,23 @@ function build() {
         console.log('Loaded config from config/config.json');
     } catch (e) {
         console.warn('Could not load config.json, using defaults');
+    }
+
+    // Load translations (separate files per language)
+    let translations = {};
+    try {
+        const enPath = path.join(translationsDir, 'en.json');
+        const itPath = path.join(translationsDir, 'it.json');
+
+        if (fs.existsSync(enPath)) {
+            translations.en = JSON.parse(fs.readFileSync(enPath, 'utf8'));
+        }
+        if (fs.existsSync(itPath)) {
+            translations.it = JSON.parse(fs.readFileSync(itPath, 'utf8'));
+        }
+        console.log('Loaded translations from config/translations/');
+    } catch (e) {
+        console.warn('Could not load translations, using defaults');
     }
 
     const baseUrl = config.seo?.baseUrl || 'https://example.com';
@@ -250,7 +268,7 @@ function build() {
                 slug: page.slug,
                 baseUrl: baseUrl
             };
-            const pageHtml = generatePageHtml(contentHtml, pageConfig);
+            const pageHtml = generatePageHtml(contentHtml, pageConfig, translations);
 
             // Write output
             fs.writeFileSync(outputPath, pageHtml, 'utf8');

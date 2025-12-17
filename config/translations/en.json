@@ -1,0 +1,67 @@
+{
+    "ui": {
+        "loading": "Loading menu...",
+        "empty": "No dishes match your filters.",
+        "apply": "Apply",
+        "close": "Close",
+        "clearAll": "Clear all",
+        "clearFilters": "Clear",
+        "retry": "Retry",
+        "updated": "Menu updated",
+        "contacts": "Contacts",
+        "welcomeMessage": "Welcome!"
+    },
+    "nav": {
+        "kitchen": "Kitchen",
+        "bar": "Bar",
+        "info": "Info",
+        "switchLang": "Switch to Italian"
+    },
+    "filters": {
+        "filterBtn": "Filter",
+        "filters": "Filters",
+        "dietPreferences": "Dietary Preferences",
+        "dietAll": "All",
+        "dietVegetarian": "Vegetarian",
+        "dietVegan": "Vegan",
+        "excludeAllergens": "Exclude Allergens",
+        "excludeAllergensDesc": "Dishes with these allergens will be hidden.",
+        "allergensExcluded": "allergens excluded"
+    },
+    "kitchen": {
+        "tabKitchen": "Kitchen Menu",
+        "tabBar": "Bar Menu",
+        "tabInfo": "Information",
+        "kitchenOpen": "Kitchen open",
+        "kitchenOpensIn": "Kitchen opens in {minutes} minutes",
+        "kitchenOpensTomorrow": "Kitchen opens tomorrow at {time}",
+        "openingHoursTitle": "Opening Hours",
+        "kitchenHoursTitle": "Kitchen Hours",
+        "nextToday": "Next today",
+        "inMinutes": "in {minutes} min",
+        "inHours": "in {hours}h"
+    },
+    "status": {
+        "errorMessage": "Menu unavailable.",
+        "staleDataMessage": "Data may be outdated. Some dishes might not be available."
+    },
+    "allergens": {
+        "gluten": "Gluten",
+        "crustaceans": "Shellfish",
+        "eggs": "Eggs",
+        "fish": "Fish",
+        "peanuts": "Peanuts",
+        "soy": "Soy",
+        "milk": "Milk",
+        "nuts": "Tree nuts",
+        "celery": "Celery",
+        "mustard": "Mustard",
+        "sesame": "Sesame",
+        "sulfites": "Sulphites",
+        "lupin": "Lupin",
+        "mollusks": "Molluscs"
+    },
+    "staticPages": {
+        "backToMenu": "Back to Menu"
+    }
+}

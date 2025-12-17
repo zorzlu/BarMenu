@@ -11,14 +11,22 @@
         "csvNumberFormat": "it"
     },
     "seo": {
-        "baseUrl": "https://zorzlu.github.io/ScomodoMenu",
+        "baseUrl": "https://zorzlu.github.io/BarMenu/",
         "searchEngineIndexing": false
     },
+    "i18n": {
+        "defaultLanguage": "it",
+        "supportedLanguages": [
+            "en",
+            "it"
+        ],
+        "fallbackLanguage": "en"
+    },
     "legal": {
-        "companyName": "Il Tuo Bar S.r.l.",
+        "companyName": "Il Tuo Bar - Bar Menu",
         "vatNumber": "IT12345678901",
         "address": "Via Roma 123, 00100 Roma",
-        "email": "privacy@iltuobar.com",
+        "email": "privacy@iltuobar-barmenu.com",
         "phone": "+39 06 12345678",
         "lastUpdated": "2024-12-17"
     },
@@ -55,23 +63,23 @@
     "contact": {
         "address": "Via Roma 123, 00100 Roma",
         "phone": "+39 06 12345678",
-        "email": "info@iltuobar.com",
+        "email": "info@iltuobar-barmenu.com",
         "socials": [
             {
                 "name": "Instagram",
-                "label": "@iltuobar",
-                "url": "https://instagram.com/iltuobar"
+                "label": "@iltuobar-barmenu",
+                "url": "https://instagram.com/iltuobar-barmenu"
             },
             {
                 "name": "Facebook",
-                "label": "Il Tuo Bar",
-                "url": "https://facebook.com/iltuobar"
+                "label": "Il Tuo Bar - Bar Menu",
+                "url": "https://facebook.com/iltuobar-barmenu"
             }
         ],
         "websites": [
             {
-                "label": "www.iltuobar.it",
-                "url": "https://www.iltuobar.it"
+                "label": "www.iltuobar-barmenu.com",
+                "url": "https://www.iltuobar-barmenu.com"
             }
         ]
     },

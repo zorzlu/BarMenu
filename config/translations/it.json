@@ -1,0 +1,67 @@
+{
+    "ui": {
+        "loading": "Caricamento menu...",
+        "empty": "Nessun piatto corrisponde ai filtri.",
+        "apply": "Applica",
+        "close": "Chiudi",
+        "clearAll": "Cancella tutto",
+        "clearFilters": "Cancella",
+        "retry": "Riprova",
+        "updated": "Menu aggiornato",
+        "contacts": "Contatti",
+        "welcomeMessage": "Benvenuti!"
+    },
+    "nav": {
+        "kitchen": "Cucina",
+        "bar": "Bar",
+        "info": "Info",
+        "switchLang": "Passa a Inglese"
+    },
+    "filters": {
+        "filterBtn": "Filtra",
+        "filters": "Filtri",
+        "dietPreferences": "Preferenze Alimentari",
+        "dietAll": "Tutti",
+        "dietVegetarian": "Vegetariano",
+        "dietVegan": "Vegano",
+        "excludeAllergens": "Escludi Allergeni",
+        "excludeAllergensDesc": "I piatti con questi allergeni verranno nascosti.",
+        "allergensExcluded": "allergeni esclusi"
+    },
+    "kitchen": {
+        "tabKitchen": "Menu Cucina",
+        "tabBar": "Menu Bar",
+        "tabInfo": "Informazioni",
+        "kitchenOpen": "Cucina aperta",
+        "kitchenOpensIn": "La cucina apre tra {minutes} minuti",
+        "kitchenOpensTomorrow": "La cucina apre domani alle {time}",
+        "openingHoursTitle": "Orari Apertura",
+        "kitchenHoursTitle": "Orari Cucina",
+        "nextToday": "Prossimo oggi",
+        "inMinutes": "tra {minutes} min",
+        "inHours": "tra {hours}h"
+    },
+    "status": {
+        "errorMessage": "Menu non disponibile.",
+        "staleDataMessage": "Dati potrebbero non essere aggiornati. Alcuni piatti potrebbero non essere disponibili."
+    },
+    "allergens": {
+        "gluten": "Glutine",
+        "crustaceans": "Crostacei",
+        "eggs": "Uova",
+        "fish": "Pesce",
+        "peanuts": "Arachidi",
+        "soy": "Soia",
+        "milk": "Latte",
+        "nuts": "Frutta a guscio",
+        "celery": "Sedano",
+        "mustard": "Senape",
+        "sesame": "Sesamo",
+        "sulfites": "Solfiti",
+        "lupin": "Lupini",
+        "mollusks": "Molluschi"
+    },
+    "staticPages": {
+        "backToMenu": "Torna al Menu"
+    }
+}
