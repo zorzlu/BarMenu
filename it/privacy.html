@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Privacy e Cookie Policy">
+    <meta name="theme-color" content="#ffffff">
+    <title>Privacy e Cookie Policy</title>
+    <link rel="stylesheet" href="../colors.css">
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Page-specific styles */
+        .page-container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: var(--spacing-md);
+            padding-top: calc(var(--header-height) + var(--sa-top) + var(--spacing-lg));
+            padding-bottom: calc(var(--spacing-xl) * 2);
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--md-sys-color-surface-container);
+            z-index: 100;
+            padding-top: var(--sa-top);
+        }
+        
+        .page-header-content {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+        }
+        
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: var(--color-accent);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 0;
+            text-decoration: none;
+        }
+        
+        .back-button:hover {
+            opacity: 0.8;
+        }
+        
+        .back-arrow {
+            font-size: 1.2em;
+        }
+        
+        .lang-switch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--color-bg);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+        
+        .page-content {
+            background: var(--color-surface);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+        }
+        
+        .page-content h1 {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.3;
+        }
+        
+        .page-content h2 {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-top: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .page-content h3 {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .page-content h3 .allergen-number {
+            color: var(--color-accent);
+            margin-right: 4px;
+        }
+        
+        .page-content p {
+            font-size: var(--font-size-base);
+            color: var(--color-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .page-content ul {
+            margin: var(--spacing-sm) 0;
+            padding-left: var(--spacing-lg);
+        }
+        
+        .page-content li {
+            font-size: var(--font-size-base);
+            color: var(--color-secondary);
+            line-height: 1.6;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .page-content a {
+            color: var(--color-accent);
+            text-decoration: none;
+        }
+        
+        .page-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .page-content hr {
+            border: none;
+            border-top: 1px solid var(--color-separator);
+            margin: var(--spacing-lg) 0;
+        }
+        
+        .page-content blockquote {
+            background: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin: var(--spacing-md) 0;
+            font-size: var(--font-size-sm);
+        }
+        
+        .page-content blockquote strong {
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        
+        .page-content em {
+            font-style: italic;
+        }
+        
+        .footer-cta {
+            margin-top: var(--spacing-xl);
+            text-align: center;
+        }
+        
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <header class="page-header">
+        <div class="page-header-content">
+            <a href="../index.html" class="back-button">
+                <span class="back-arrow">←</span>
+                Torna al Menu
+            </a>
+            <a href="../en/privacy.html" class="lang-switch" aria-label="Switch language">
+                🇬🇧
+            </a>
+        </div>
+    </header>
+    
+    <main class="page-container">
+        <article class="page-content">
+            <h1>Informativa sulla Privacy e Cookie Policy</h1>
+
+<h2>Titolare del Trattamento</h2>
+
+<p>Il titolare del trattamento dei dati personali è il gestore dell'esercizio commerciale le cui informazioni di contatto sono disponibili nella sezione "Info" del menu.</p>
+
+<h2>Dati Raccolti</h2>
+
+<p>Questo sito web è una semplice applicazione per la visualizzazione del menu e <strong>non raccoglie dati personali</strong> degli utenti in modo attivo.</p>
+
+<h3>Dati Tecnici</h3>
+
+<p>Per il corretto funzionamento dell'applicazione, possono essere memorizzate localmente nel browser (localStorage) le seguenti preferenze:</p>
+
+<ul><li><strong>Lingua preferita</strong> (italiano/inglese)</li><li><strong>Preferenze alimentari</strong> (vegetariano, vegano)</li><li><strong>Allergeni da escludere</strong></li></ul>
+
+<p>Queste informazioni sono salvate esclusivamente sul dispositivo dell'utente e non vengono trasmesse a server esterni.</p>
+
+<h2>Cookie</h2>
+
+<p>Questo sito <strong>non utilizza cookie</strong> per tracciare gli utenti o per finalità pubblicitarie.</p>
+
+<h3>Cookie Tecnici</h3>
+
+<p>L'applicazione potrebbe utilizzare esclusivamente cookie tecnici strettamente necessari per:</p>
+
+<ul><li>Garantire il corretto funzionamento del sito</li><li>Memorizzare le preferenze dell'utente</li></ul>
+
+<h2>Servizi di Terze Parti</h2>
+
+<p>Il menu può essere caricato da Google Sheets. In tal caso, la connessione a Google è soggetta alla <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy di Google</a>.</p>
+
+<h2>Diritti dell'Utente</h2>
+
+<p>In conformità al GDPR, l'utente ha diritto di:</p>
+
+<ul><li>Accedere ai propri dati</li><li>Rettificare i dati inesatti</li><li>Cancellare i propri dati</li><li>Opporsi al trattamento</li><li>Richiedere la portabilità dei dati</li></ul>
+
+<p>Per esercitare questi diritti, contattare il titolare del trattamento tramite i recapiti disponibili nella sezione Info.</p>
+
+<h2>Modifiche all'Informativa</h2>
+
+<p>Questa informativa può essere aggiornata periodicamente. Si consiglia di consultarla regolarmente.</p>
+
+<hr>
+
+<em>Ultimo aggiornamento: Dicembre 2024</em>
+
+        </article>
+        
+        <div class="footer-cta">
+            <a href="../index.html" class="cta-button">
+                <span>←</span>
+                Torna al Menu
+            </a>
+        </div>
+    </main>
+</body>
+</html>

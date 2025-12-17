@@ -1,195 +1,112 @@
-# Menu del Giorno - Sito Web Statico
+# Il Tuo Bar - Digital Menu
 
-Un sito web statico per visualizzare il "menu del giorno" di un bar, con i dati provenienti da un foglio Google Sheets pubblicato come CSV.
+A modern, fast, and easy-to-update digital menu for bars and restaurants. Powered by a single Google Sheet and configurable via JSON.
 
-## Caratteristiche
+## Features
 
-- 📱 **Mobile-first**: Ottimizzato per la visualizzazione su smartphone
-- 🌐 **Multilingua**: Supporto italiano/inglese con fallback automatico
-- 🔄 **Aggiornamento intelligente**: Il menu si aggiorna quando torni sulla pagina
-- ⚠️ **Gestione allergeni**: 14 allergeni con icone e filtro di esclusione
-- 🌿 **Filtri dietetici**: Filtra per Tutti, Vegetariano o Vegano
-- 🍽️ **Due menu**: Supporto per menu "Cucina" e "Bar" separati
-- 🚀 **Nessun framework**: Solo HTML, CSS e JavaScript vanilla
-- 📊 **Dati da Google Sheets**: Facile gestione tramite foglio di calcolo
+- 📱 **Mobile-first**: Responsive design optimized for smartphones.
+- 🌐 **Multilanguage**: Native Italian/English support with instant switch.
+- 🔄 **Unified Data**: Manage Kitchen, Bar, Opening Hours, and Content from a single Google Sheet.
+- ⚠️ **Allergens & Diets**: Filters for Vegetarian/Vegan and multiple allergen exclusions.
+- ⚙️ **Configurable**: Easy customization via `config.json`.
+- 🚀 **Zero Backend**: Works as a static site (HTML/CSS/JS), perfect for GitHub Pages.
 
 ---
 
-## Configurazione
+## Quick Setup
 
-### 1. Creare il Foglio Google Sheets
+### 1. The Google Sheet (Unified CSV)
 
-1. Vai su [Google Sheets](https://sheets.google.com) e crea un nuovo foglio
-2. Nomina il foglio, ad esempio "Menu Bar"
-3. Inserisci le intestazioni nella **prima riga** (vedi schema sotto)
+The system uses a **single spreadsheet** divided into horizontal sections.
 
-### 2. Schema delle Colonne (Headers)
+1.  **Download the Template**: Download the [`fallback_data.csv`](fallback_data.csv) file from this repository.
+2.  **Upload to Google Drive**: Upload the file to your Google Drive and open it with **Google Sheets**.
+3.  **Edit Data**: Update the rows with your menu items.
+    *   **Row 1 (Markers)**: Defines the sections (`bar`, `kitchen`, `timeslots`, `content`, `categories`). **Do not modify this row.**
+    *   **Row 2 (Headers)**: Column names for each section.
+    *   **Row 3+ (Data)**: Your actual content.
+4.  **Publish as CSV**:
+    *   Go to *File > Share > Publish to web*.
+    *   Select the specific sheet (tab) you are working on.
+    *   Choose **Comma-separated values (.csv)** as the format.
+    *   Click **Publish** and copy the generated URL.
 
-La prima riga deve contenere esattamente queste intestazioni (in italiano):
+### 2. Site Configuration (`config.json`)
 
-#### Colonne Obbligatorie
+Open the `config.json` file and update the main fields:
 
-| Colonna | Tipo | Descrizione |
-|---------|------|-------------|
-| `categoria` | Testo | Categoria del piatto (es. "Panini", "Cucina", "Cocktail") |
-| `nome_it` | Testo | Nome del piatto in italiano |
-| `descrizione_it` | Testo | Descrizione in italiano (opzionale) |
-| `prezzo` | Numero | Prezzo in Euro (accetta sia `6,50` che `6.50`) |
-| `tipo` | Testo | Tipo di piatto: `standard`, `vegetariano`, o `vegano` |
-| `attivo` | Checkbox | Seleziona per mostrare il piatto nel menu |
-
-> ⚠️ **Nota**: La colonna `valuta` non è più necessaria. Tutti i prezzi sono in Euro (€).
-
-#### Colonne Opzionali per Ordinamento
-
-| Colonna | Tipo | Descrizione |
-|---------|------|-------------|
-| `ordine_categoria` | Numero | Ordine di visualizzazione della categoria |
-| `ordine_prodotto` | Numero | Ordine del piatto dentro la categoria |
-| `ultimo_aggiornamento` | Testo | Data/ora ultimo aggiornamento (mostrata nel sito) |
-
-#### Colonne Opzionali per Inglese
-
-| Colonna | Tipo | Descrizione |
-|---------|------|-------------|
-| `nome_en` | Testo | Nome in inglese (fallback: italiano) |
-| `descrizione_en` | Testo | Descrizione in inglese (fallback: italiano) |
-
-#### Colonne Allergeni (TRUE/FALSE)
-
-Aggiungi una colonna per ogni allergene utilizzando **checkbox** (caselle di controllo):
-
-| Colonna | Allergene | Icona |
-|---------|-----------|-------|
-| `all_1_glutine` | Glutine | 🌾 |
-| `all_2_crostacei` | Crostacei | 🦐 |
-| `all_3_uova` | Uova | 🥚 |
-| `all_4_pesce` | Pesce | 🐟 |
-| `all_5_arachidi` | Arachidi | 🥜 |
-| `all_6_soia` | Soia | 🫘 |
-| `all_7_latte` | Latte | 🥛 |
-| `all_8_frutta_a_guscio` | Frutta a guscio | 🌰 |
-| `all_9_sedano` | Sedano | 🥬 |
-| `all_10_senape` | Senape | 🟡 |
-| `all_11_sesamo` | Sesamo | 🫛 |
-| `all_12_solfiti` | Solfiti | 🍷 |
-| `all_13_lupini` | Lupini | 🌸 |
-| `all_14_molluschi` | Molluschi | 🐚 |
-
----
-
-### 3. Tipi di Piatto
-
-La colonna `tipo` determina come viene mostrato il piatto:
-
-| Valore | Descrizione | Badge |
-|--------|-------------|-------|
-| `standard` | Piatto normale (carne, pesce, ecc.) | Nessun badge |
-| `vegetariano` | Senza carne, può contenere latticini/uova | 🌿 Vegetariano |
-| `vegano` | Senza prodotti animali | 🌱 Vegano |
-
-> 💡 **Logica del filtro**: 
-> - "Tutti" mostra tutto
-> - "Vegetariano" mostra vegetariano + vegano
-> - "Vegano" mostra solo vegano
-
----
-
-### 4. Riga di Esempio
-
-```csv
-categoria,nome_it,descrizione_it,prezzo,tipo,attivo,ordine_categoria,ordine_prodotto,nome_en,descrizione_en,all_1_glutine,all_3_uova,all_7_latte
-Primi,Pasta al Pomodoro,Spaghetti con salsa fresca,9.00,vegano,TRUE,1,1,Tomato Pasta,Fresh tomato sauce,TRUE,FALSE,FALSE
-Secondi,Insalata Caprese,Mozzarella e pomodoro,10.00,vegetariano,TRUE,2,1,Caprese Salad,Mozzarella and tomato,FALSE,FALSE,TRUE
-Dolci,Sorbetto Limone,Fresco e leggero,5.00,vegano,TRUE,3,1,Lemon Sorbet,Fresh and light,FALSE,FALSE,FALSE
+```json
+{
+    "app": {
+        "name": "Your Bar Name",
+        "logoUrl": "logo.png",
+        "csvLanguage": "en" // 'it' or 'en' depending on your CSV language
+    },
+    "urls": {
+        "menu": "PASTE_YOUR_GOOGLE_SHEETS_CSV_URL_HERE"
+    },
+    "contact": {
+        "address": "Your Address",
+        "phone": "+39 ...",
+        "socials": [...]
+    }
+}
 ```
 
----
-
-### 5. Pubblicare il Foglio come CSV
-
-1. Nel foglio Google Sheets, vai su **File** → **Condividi** → **Pubblica sul web**
-2. Nella finestra che si apre:
-   - Scegli il **foglio specifico** (non "Intero documento") se hai più fogli
-   - Seleziona **CSV** come formato
-3. Clicca su **Pubblica**
-4. Copia l'URL generato
+> 💡 **Note**: If `urls.menu` is empty or invalid, the site will automatically use the local `fallback_data.csv` file.
 
 ---
 
-### 6. Configurare il Sito
+## Unified CSV Structure
 
-1. Apri il file `app.js`
-2. Trova la sezione `CONFIG` all'inizio del file:
-   ```javascript
-   const CONFIG = {
-       cuisine: {
-           url: "PASTE_CUISINE_CSV_URL_HERE", // URL per il menu Cucina
-           name: "Cucina"
-       },
-       bar: {
-           url: "PASTE_BAR_CSV_URL_HERE",     // URL per il menu Bar
-           name: "Bar"
-       }
-   };
-   ```
-3. Incolla i due URL dei CSV pubblicati nei rispettivi campi.
+The sheet is divided into column groups. Each section must maintain the column order as shown in the template.
 
-> 💡 **Modalità offline**: Se non configuri gli URL, il sito usa i file `cuisine.csv` e `bar.csv` locali inclusi nel progetto.
+#### Main Sections
+1.  **Bar** (`bar`): Drinks, coffee, cocktails.
+2.  **Kitchen** (`kitchen`): Food items (First courses, Main courses, etc.).
+3.  **Categories** (`categories`): Defines the order and labels of the categories shown (e.g., "Starters", "Beers").
 
----
+#### Data Columns (Bar/Kitchen)
+*   `categoria`: Must match an ID in the Categories section.
+*   `nome_it` / `nome_en`: Item name.
+*   `descrizione_it` / `descrizione_en`: Detailed description.
+*   `prezzo`: Price (e.g., `10.00`).
+*   `tipo`: `standard`, `vegetariano`, `vegano` (or `vegan`).
+*   `attivo`: `TRUE` to show, `FALSE` to hide.
+*   `all_1_glutine`...: `TRUE` if the allergen is present.
 
-## Funzionalità per gli Utenti
+#### Time Slots Section (`timeslots`)
+Defines the time slots shown on the home page (e.g., "Open now", "Lunch in 2h") and info page.
+*   `slot_id`: Unique ID (e.g., `lunch`, `dinner`).
+*   `giorno`: `mon`, `tue`, `wed`, `thu`, `fri`, `sat`, `sun`.
+*   `apertura` / `chiusura`: Times (e.g., `12:00`, `15:00`).
 
-### Filtri Dietetici
-
-Gli utenti possono filtrare il menu usando i pulsanti nella barra filtri:
-- **Tutti**: Mostra tutti i piatti
-- **Vegetariano**: Mostra solo piatti vegetariani e vegani
-- **Vegano**: Mostra solo piatti vegani
-
-### Esclusione Allergeni
-
-1. Clicca sul pulsante **⚠️ Allergeni**
-2. Seleziona gli allergeni da escludere
-3. Clicca **Applica**
-4. I piatti contenenti quegli allergeni verranno nascosti
-
-Un badge rosso sul pulsante indica quanti allergeni sono esclusi.
+#### Content Section (`content`)
+Add custom text or banners to the Info page and Menu tabs.
+*   `type`: `text`, `cta` (button), `menu_header_kitchen`, `menu_header_bar`.
 
 ---
 
-## Ospitare su GitHub Pages
+## Advanced Customization
 
-1. Crea un nuovo repository su GitHub
-2. Carica i file del progetto:
-   - `index.html`
-   - `styles.css`
-   - `app.js`
-   - `cuisine.csv` (opzionale, per fallback)
-   - `bar.csv` (opzionale, per fallback)
-3. Vai in **Settings** → **Pages**
-4. In "Source", seleziona:
-   - Branch: `main`
-   - Folder: `/ (root)`
-5. Clicca **Save**
+### Icons & Colors
+*   Edit `colors.css` to change the color palette (based on Material 3 CSS variables).
+*   Allergen and diet icons are configurable in `config.json` under `allergens` and `foodTypes`.
+
+### Translations
+Fixed UI strings (e.g., "Filters", "Close") are located in `translations.json`.
 
 ---
 
-## Struttura File
+## Local Installation
 
-```
-menu-del-giorno/
-├── index.html      # Pagina principale
-├── styles.css      # Stili CSS
-├── app.js          # Logica JavaScript
-├── cuisine.csv     # Dati menu cucina (fallback locale)
-├── bar.csv         # Dati menu bar (fallback locale)
-└── README.md       # Questa documentazione
-```
+No build tools (Node, NPM, etc.) are required. It is a pure static site.
 
----
+1.  Clone the repository.
+2.  Open `index.html` in your browser or use a local server (e.g., VS Code Live Server).
 
-## Licenza
+## Deployment
 
-Questo progetto è rilasciato con licenza MIT.
+To go online, simply upload the files to any static hosting service:
+*   **GitHub Pages** (Recommended): Upload files to a repo and enable Pages in Settings.
+*   Netlify / Vercel: Drag and drop the project folder.

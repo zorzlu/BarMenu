@@ -4,6 +4,7 @@
   },
   "scripts": {
     "generate-theme": "node generate_colors.js",
+    "build-pages": "node build-pages.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }
