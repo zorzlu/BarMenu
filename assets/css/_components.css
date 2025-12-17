@@ -3,18 +3,65 @@
    ======================================== */
 
 /* Kitchen Status Card */
+/* Kitchen Status */
+.kitchen-status-container {
+    display: flex;
+    flex-wrap: wrap;
+    /* Allow wrapping */
+    justify-content: center;
+    gap: 8px;
+    margin-top: var(--spacing-sm);
+    width: 100%;
+}
+
 .kitchen-status-card {
-    background: linear-gradient(135deg, var(--md-sys-color-tertiary-container), var(--md-sys-color-secondary-container));
-    color: var(--md-sys-color-on-secondary-container);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    font-weight: 600;
+    /* Default (Upcoming) Style */
+    background: var(--md-sys-color-tertiary-container);
+    /* Solid tertiary color, no gradient */
+    color: var(--md-sys-color-on-tertiary-container);
+    padding: 10px 20px;
+    /* Slightly larger padding for "big enough" feel */
+    border-radius: var(--border-radius-lg);
+    /* Standard rounded corner */
     font-size: var(--font-size-sm);
     text-align: center;
-    display: inline-block;
-    margin-top: var(--spacing-sm);
+    display: inline-flex;
+    flex-direction: column;
+    /* Stack title and status */
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
     animation: fadeIn 0.5s ease-out;
+    min-width: 140px;
+    /* Ensure some width */
+    flex: 1 1 auto;
+    /* Grow to fill space, but allow shrinking/wrapping */
+    max-width: 300px;
+}
+
+.kitchen-status-card.active {
+    /* Active Style */
+    background: #cdeda3;
+    color: #354e16;
+    border-radius: 100px;
+    /* Fully round pill */
+}
+
+.kitchen-status-card .status-event {
+    font-weight: 700;
+    font-size: var(--font-size-base);
+    line-height: 1.2;
+}
+
+.kitchen-status-card .status-message {
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    line-height: 1.2;
+    opacity: 0.9;
+}
+
+.kitchen-status-card.hidden {
+    display: none;
 }
 
 /* Update Indicator */

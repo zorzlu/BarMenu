@@ -49,7 +49,7 @@ export function parseCSV(text) {
     if (rows.length === 0) return [];
 
     // Get CSV language setting
-    const csvLang = state.config?.app?.csvLanguage || 'en';
+    const csvLang = state.config?.inputData?.csvLanguage || 'en';
     const csvKeywords = TRANSLATIONS?.csvKeywords || {};
 
     // Translate headers if Italian CSV
@@ -135,7 +135,7 @@ export function parseUnifiedCSV(text) {
 
     if (rows.length < 3) return { bar: [], kitchen: [], timeslots: [], content: [], categories: [] };
 
-    const csvLang = state.config?.app?.csvLanguage || 'en';
+    const csvLang = state.config?.inputData?.csvLanguage || 'en';
     const csvKeywords = TRANSLATIONS?.csvKeywords || {};
 
     // Row 0: Table markers (bar, kitchen, timeslots, content, categories)
@@ -359,7 +359,7 @@ export function processTimeslotsData(rawData) {
 
         const slot = timeSlotsMap.get(slotId);
         if (row.open && row.close) {
-            const fmt = state.config?.app?.csvNumberFormat || 'us';
+            const fmt = state.config?.inputData?.csvNumberFormat || 'us';
             slot.schedule.push({
                 day: dayNum,
                 open: parseTimeValue(row.open, fmt),

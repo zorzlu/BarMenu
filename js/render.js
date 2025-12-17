@@ -30,7 +30,7 @@ export const elements = {
     heroTitle: document.getElementById('heroTitle'),
     heroClaim: document.getElementById('heroClaim'),
     heroText: document.getElementById('heroText'),
-    kitchenStatus: document.getElementById('kitchenStatus'),
+    kitchenStatusContainer: document.getElementById('kitchenStatusContainer'),
     // App container
     appContainer: document.getElementById('appContainer'),
     mainHeader: document.getElementById('mainHeader'),
@@ -652,11 +652,11 @@ export function updateHeroContent() {
 
 // Kitchen Status
 export function updateKitchenStatus() {
-    if (!elements.kitchenStatus) return;
+    if (!elements.kitchenStatusContainer) return;
 
     const timeSlots = state.data?.info?.timeSlotsForHero;
     if (!timeSlots || timeSlots.length === 0) {
-        elements.kitchenStatus.hidden = true;
+        elements.kitchenStatusContainer.hidden = true;
         return;
     }
 
@@ -664,28 +664,37 @@ export function updateKitchenStatus() {
     const upcomingSlots = getUpcomingSlots(now);
 
     if (upcomingSlots.length === 0) {
-        elements.kitchenStatus.hidden = true;
+        elements.kitchenStatusContainer.hidden = true;
         return;
     }
 
-    const parts = [];
-
-    for (const slot of upcomingSlots) {
+    let html = '';
+    upcomingSlots.forEach(slot => {
+        let message = '';
         if (slot.status === 'active') {
-            parts.push(`${slot.label} ✓`);
+            // E.g. "Open until 22:30"
+            message = `${t('kitchen.statusOpenUntil')} ${slot.closeTime}`;
         } else {
-            parts.push(`${slot.label} ${formatDuration(slot.minutesUntil)}`);
+            // E.g. "Opens at 19:00" or "Opens in 30 min"
+            if (slot.minutesUntil <= 60) {
+                message = `${t('kitchen.statusOpensIn').replace('{minutes}', slot.minutesUntil)}`;
+            } else {
+                message = `${t('kitchen.statusOpensAt')} ${slot.openTime}`;
+            }
         }
-    }
 
-    if (parts.length > 0) {
-        const hasActive = upcomingSlots.some(s => s.status === 'active');
-        const prefix = hasActive ? '' : t('kitchen.nextToday') + ': ';
-        elements.kitchenStatus.textContent = prefix + parts.join(' · ');
-        elements.kitchenStatus.hidden = false;
-    } else {
-        elements.kitchenStatus.hidden = true;
-    }
+        const activeClass = slot.status === 'active' ? 'active' : '';
+
+        html += `
+            <div class="kitchen-status-card ${activeClass}">
+                <div class="status-event">${escapeHTML(slot.label)}</div>
+                <div class="status-message">${escapeHTML(message)}</div>
+            </div>
+        `;
+    });
+
+    elements.kitchenStatusContainer.innerHTML = html;
+    elements.kitchenStatusContainer.hidden = false;
 }
 
 function getUpcomingSlots(now) {
@@ -736,7 +745,9 @@ function getUpcomingSlots(now) {
                     label,
                     status: 'active',
                     isKitchen: slot.isKitchen,
-                    minutesUntil: 0
+                    minutesUntil: 0,
+                    openTime: sched.open,
+                    closeTime: sched.close
                 });
             } else if (isUpcoming) {
                 // Calculate minutes until open
@@ -746,7 +757,9 @@ function getUpcomingSlots(now) {
                     label,
                     status: 'upcoming',
                     isKitchen: slot.isKitchen,
-                    minutesUntil: minUntil
+                    minutesUntil: minUntil,
+                    openTime: sched.open,
+                    closeTime: sched.close
                 });
             }
         }

@@ -39,7 +39,11 @@
         "kitchenHoursTitle": "Kitchen Hours",
         "nextToday": "Next today",
         "inMinutes": "in {minutes} min",
-        "inHours": "in {hours}h"
+        "inHours": "in {hours}h",
+        "statusOpen": "Open",
+        "statusOpenUntil": "Open until",
+        "statusOpensAt": "Opens at",
+        "statusOpensIn": "Opens in {minutes} min"
     },
     "info": {
         "openingHours": "Opening Hours",

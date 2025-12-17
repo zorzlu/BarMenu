@@ -39,7 +39,11 @@
         "kitchenHoursTitle": "Orari Cucina",
         "nextToday": "Prossimo oggi",
         "inMinutes": "tra {minutes} min",
-        "inHours": "tra {hours}h"
+        "inHours": "tra {hours}h",
+        "statusOpen": "Aperto",
+        "statusOpenUntil": "Aperto fino alle",
+        "statusOpensAt": "Apre alle",
+        "statusOpensIn": "Apre tra {minutes} min"
     },
     "info": {
         "openingHours": "Orari Apertura",

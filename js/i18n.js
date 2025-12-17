@@ -38,7 +38,7 @@ export async function loadTranslations() {
         // Load CSV schema
         const schemaResponse = await fetch(`config/csv-schema.json?t=${Date.now()}`);
         const csvSchema = await schemaResponse.json();
-        const csvLang = state.config?.app?.csvLanguage || 'it';
+        const csvLang = state.config?.inputData?.csvLanguage || 'it';
         // Store the CSV keywords for the configured CSV language
         TRANSLATIONS.csvKeywords = csvSchema[csvLang] || csvSchema['it'];
 

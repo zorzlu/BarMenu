@@ -97,7 +97,7 @@ body {
     font-size: var(--font-size-base);
     line-height: 1.5;
     color: var(--color-primary);
-    background-color: var(--color-bg);
+    background-color: var(--md-sys-color-surface-container);
     min-height: 100vh;
     margin: 0;
     padding: 0;
