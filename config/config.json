@@ -1,40 +1,87 @@
 {
-    "app": {
-        "name": "Il Tuo Bar",
+    "settings": {
+        "baseUrl": "https://zorzlu.github.io/BarMenu",
+        "languages": {
+            "default": "it",
+            "supported": [
+                "en",
+                "it"
+            ],
+            "fallback": "en",
+            "locale": "it-IT"
+        },
+        "theme": {
+            "mode": "light",
+            "accentColor": "#A6507E",
+            "themeColor": "#A6507E"
+        },
+        "fonts": {
+            "primary": "Inter, sans-serif"
+        },
+        "formats": {
+            "currency": "EUR",
+            "currencySymbol": "€",
+            "timeFormat": "24h"
+        }
+    },
+    "branding": {
+        "barName": "Il Tuo Bar",
         "heroLogo": "assets/images/iltuobarlogo.png",
         "navbarLogo": "assets/images/iltuobar_navbar_icon.png",
-        "accentColor": "#A6507E",
-        "theme-color": "#A6507E",
-        "theme": "light",
-        "fontFamily": "Inter, sans-serif",
+        "favicon": "assets/images/favicon.png",
         "claim": {
             "it": "Semplicemente il migliore",
             "en": "Simply the best"
-        },
-        "csvLanguage": "it",
-        "csvNumberFormat": "it"
-    },
-    "page": {
-        "title": {
-            "it": "Menu del Giorno",
-            "en": "Daily Menu"
-        },
-        "description": {
-            "it": "Menu del giorno - Scopri i nostri piatti e le nostre specialità",
-            "en": "Daily menu - Discover our dishes and specialties"
         }
     },
     "seo": {
-        "baseUrl": "https://zorzlu.github.io/BarMenu",
         "searchEngineIndexing": false
     },
-    "i18n": {
-        "defaultLanguage": "it",
-        "supportedLanguages": [
-            "en",
-            "it"
-        ],
-        "fallbackLanguage": "en"
+    "inputData": {
+        "menuUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyK90FkAcIV3fRIq854TaE0n4PChD8jPhoSnGKJKhMco9cx4mhGljtG16zd9yTFm6m3prTl1zST1dS/pub?gid=1317594543&single=true&output=csv",
+        "fallbackFile": "data/fallback_menu.csv",
+        "csvLanguage": "it",
+        "csvNumberFormat": "it"
+    },
+    "pages": {
+        "menuPage": {
+            "title": {
+                "it": "Menu del Giorno",
+                "en": "Daily Menu"
+            },
+            "description": {
+                "it": "Menu del giorno - Scopri i nostri piatti e le nostre specialità",
+                "en": "Daily menu - Discover our dishes and specialties"
+            }
+        },
+        "staticPages": [
+            {
+                "id": "privacyCookiePolicy",
+                "slug": "privacy-cookie-policy",
+                "template": "content/privacy-policy.{lang}.md",
+                "title": {
+                    "it": "Privacy e Cookie Policy",
+                    "en": "Privacy and Cookie Policy"
+                },
+                "description": {
+                    "it": "Informativa sulla privacy e sui cookie per il menu digitale",
+                    "en": "Privacy and cookie policy for the digital menu"
+                }
+            },
+            {
+                "id": "allergens",
+                "slug": "allergens",
+                "template": "content/allergens.{lang}.md",
+                "title": {
+                    "it": "Informazioni sugli Allergeni",
+                    "en": "Allergen Information"
+                },
+                "description": {
+                    "it": "Elenco dei 14 allergeni regolamentati dall'UE e come leggerli nel menu",
+                    "en": "List of 14 EU regulated allergens and how to read them in the menu"
+                }
+            }
+        ]
     },
     "legal": {
         "companyName": "Il Tuo Bar - Bar Menu",
@@ -43,36 +90,6 @@
         "email": "privacy@iltuobar-barmenu.com",
         "phone": "+39 06 12345678",
         "lastUpdated": "2024-12-17"
-    },
-    "pages": {
-        "privacyCookiePolicy": {
-            "slug": "privacy-cookie-policy",
-            "title": {
-                "it": "Privacy e Cookie Policy",
-                "en": "Privacy and Cookie Policy"
-            },
-            "description": {
-                "it": "Informativa sulla privacy e sui cookie per il menu digitale",
-                "en": "Privacy and cookie policy for the digital menu"
-            }
-        },
-        "allergens": {
-            "slug": "allergens",
-            "title": {
-                "it": "Informazioni sugli Allergeni",
-                "en": "Allergen Information"
-            },
-            "description": {
-                "it": "Elenco dei 14 allergeni regolamentati dall'UE e come leggerli nel menu",
-                "en": "List of 14 EU regulated allergens and how to read them in the menu"
-            }
-        }
-    },
-    "regional": {
-        "locale": "it-IT",
-        "currency": "EUR",
-        "currencySymbol": "€",
-        "timeFormat": "24h"
     },
     "contact": {
         "address": "Via Roma 123, 00100 Roma",
@@ -96,9 +113,6 @@
                 "url": "https://www.iltuobar-barmenu.com"
             }
         ]
-    },
-    "urls": {
-        "menu": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyK90FkAcIV3fRIq854TaE0n4PChD8jPhoSnGKJKhMco9cx4mhGljtG16zd9yTFm6m3prTl1zST1dS/pub?gid=1317594543&single=true&output=csv"
     },
     "allergens": {
         "all_1_gluten": {

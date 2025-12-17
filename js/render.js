@@ -89,18 +89,18 @@ export function updateUILanguage() {
     const config = state.config;
 
     // Update page title
-    const pageTitle = tConfig(config?.page?.title, 'Menu');
+    const pageTitle = tConfig(config?.pages?.menuPage?.title, 'Menu');
     document.title = pageTitle;
 
     // Update meta description
-    const pageDesc = tConfig(config?.page?.description, '');
+    const pageDesc = tConfig(config?.pages?.menuPage?.description, '');
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc && pageDesc) {
         metaDesc.setAttribute('content', pageDesc);
     }
 
     // Update hero claim
-    const claim = tConfig(config?.app?.claim, '');
+    const claim = tConfig(config?.branding?.claim, '');
     if (elements.heroClaim && claim) {
         elements.heroClaim.textContent = claim;
     }
@@ -258,7 +258,10 @@ export function render() {
         html += '</div></section>';
     });
 
-    const allergensSlug = state.config?.pages?.allergens?.slug || 'allergens';
+    // Get allergens page slug from staticPages array
+    const staticPages = state.config?.pages?.staticPages || [];
+    const allergensPageConfig = staticPages.find(p => p.id === 'allergens');
+    const allergensSlug = allergensPageConfig?.slug || 'allergens';
     const allergensPage = `pages/${lang}/${allergensSlug}.html`;
     html += `
         <div class="allergen-info-footer">
@@ -431,9 +434,10 @@ function renderInfoPage() {
 
     html += `<div class="squiggle"><svg aria-hidden="true" width="100%" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><pattern id="a" width="91" height="8" patternUnits="userSpaceOnUse"><g clip-path="url(#clip0_2426_11367)"><path d="M114 4c-5.067 4.667-10.133 4.667-15.2 0S88.667-.667 83.6 4 73.467 8.667 68.4 4 58.267-.667 53.2 4 43.067 8.667 38 4 27.867-.667 22.8 4 12.667 8.667 7.6 4-2.533-.667-7.6 4s-10.133 4.667-15.2 0S-32.933-.667-38 4s-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133-4.667-15.2 0-10.133 4.667-15.2 0-10.133 4.667-15.2 0" stroke="#E1E3E1" stroke-linecap="square"></path></g></pattern><rect width="100%" height="100%" fill="url(#a)"></rect></svg></div>`;
 
-    // 4. Legal / Footer Links
-    const privacyPage = config?.pages?.privacyCookiePolicy;
-    const allergensPage = config?.pages?.allergens;
+    // 4. Legal / Footer Links - find pages from staticPages array
+    const staticPages = config?.pages?.staticPages || [];
+    const privacyPage = staticPages.find(p => p.id === 'privacyCookiePolicy');
+    const allergensPage = staticPages.find(p => p.id === 'allergens');
 
     if (privacyPage || allergensPage) {
         html += `<section class="info-section contacts-section" style="margin-top: 24px;">`;
@@ -573,12 +577,12 @@ export function showUpdateIndicator() {
 export function applyConfig() {
     if (!state.config) return;
 
-    const { app } = state.config;
+    const { branding } = state.config;
 
-    if (app?.name) elements.storeName.textContent = app.name;
+    if (branding?.barName) elements.storeName.textContent = branding.barName;
 
-    if (app?.logoUrl && elements.storeLogo) {
-        elements.storeLogo.src = app.logoUrl;
+    if (branding?.navbarLogo && elements.storeLogo) {
+        elements.storeLogo.src = branding.navbarLogo;
         elements.storeLogo.hidden = false;
     }
 }
@@ -610,13 +614,13 @@ export function toggleHeader() {
 export function updateHeroContent() {
     const config = state.config;
 
-    const appName = config?.app?.name || 'Menu';
-    const claim = tConfig(config?.app?.claim, '');
+    const appName = config?.branding?.barName || 'Menu';
+    const claim = tConfig(config?.branding?.claim, '');
     if (elements.heroClaim && claim) {
         elements.heroClaim.textContent = claim;
     }
 
-    const heroLogoUrl = config?.app?.heroLogo;
+    const heroLogoUrl = config?.branding?.heroLogo;
     if (heroLogoUrl) {
         elements.heroLogo.src = heroLogoUrl;
         elements.heroLogo.alt = appName;
@@ -625,7 +629,7 @@ export function updateHeroContent() {
         elements.heroLogo.hidden = true;
     }
 
-    const navbarLogoUrl = config?.app?.navbarLogo;
+    const navbarLogoUrl = config?.branding?.navbarLogo;
     if (elements.navbarLogo && navbarLogoUrl) {
         elements.navbarLogo.src = navbarLogoUrl;
         elements.navbarLogo.hidden = false;

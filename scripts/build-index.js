@@ -23,9 +23,9 @@ function build() {
         }
 
         const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-        const baseUrl = config.seo?.baseUrl || 'https://example.com';
-        const defaultLanguage = config.i18n?.defaultLanguage || 'it';
-        const supportedLanguages = config.i18n?.supportedLanguages || ['en', 'it'];
+        const baseUrl = config.settings?.baseUrl || 'https://example.com';
+        const defaultLanguage = config.settings?.languages?.default || 'it';
+        const supportedLanguages = config.settings?.languages?.supported || ['en', 'it'];
 
         console.log(`Generating index.html hreflang tags...`);
         console.log(`Base URL: ${baseUrl}`);

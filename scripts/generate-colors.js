@@ -54,8 +54,8 @@ function generateColors() {
         }
 
         const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-        const accentColor = config.app?.accentColor || '#007aff';
-        const isDark = config.app?.theme === 'dark';
+        const accentColor = config.settings?.theme?.accentColor || '#007aff';
+        const isDark = config.settings?.theme?.mode === 'dark';
 
         console.log(`Generating theme for accent: ${accentColor}, mode: ${isDark ? 'dark' : 'light'}`);
 

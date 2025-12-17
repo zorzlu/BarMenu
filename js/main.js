@@ -49,10 +49,10 @@ async function loadConfig() {
 
 function validateAndSetLanguage() {
     const config = state.config;
-    if (!config || !config.i18n) return;
+    if (!config || !config.settings?.languages) return;
 
-    const supported = config.i18n.supportedLanguages || [];
-    const defaultLang = config.i18n.defaultLanguage || 'en';
+    const supported = config.settings.languages.supported || [];
+    const defaultLang = config.settings.languages.default || 'en';
     let current = state.currentLanguage;
 
     // If undefined or not in supported list, fallback to default
@@ -67,7 +67,7 @@ function validateAndSetLanguage() {
 // Fetch Unified Data
 async function fetchUnifiedData(isRefresh = true) {
     try {
-        const menuUrl = state.config?.urls?.menu;
+        const menuUrl = state.config?.inputData?.menuUrl;
         let response;
         let text;
         let usingFallback = false;
@@ -195,8 +195,8 @@ function handleTouchMove(e) {
 }
 
 function switchLanguage(newLang) {
-    const defaultLang = state.config?.i18n?.defaultLanguage || 'en';
-    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en'];
+    const defaultLang = state.config?.settings?.languages?.default || 'en';
+    const supportedLangs = state.config?.settings?.languages?.supported || ['en'];
 
     if (!supportedLangs.includes(newLang)) {
         console.warn(`Unsupported language: ${newLang}`);
@@ -271,7 +271,7 @@ async function init() {
         // Language Init from URL or Storage
         const urlParams = new URLSearchParams(window.location.search);
         const langParam = urlParams.get('lang');
-        const supported = state.config.i18n.supportedLanguages;
+        const supported = state.config.settings?.languages?.supported || [];
 
         if (langParam && supported.includes(langParam)) {
             state.currentLanguage = langParam;
@@ -280,7 +280,7 @@ async function init() {
             if (stored && supported.includes(stored)) {
                 state.currentLanguage = stored;
             } else {
-                state.currentLanguage = state.config.i18n.defaultLanguage;
+                state.currentLanguage = state.config.settings?.languages?.default || 'en';
             }
         }
 
@@ -411,7 +411,7 @@ window.addEventListener('touchstart', handleTouchStart, { passive: true });
 window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
 elements.langSwitch.addEventListener('click', () => {
-    const defaultLang = state.config?.i18n?.defaultLanguage || 'it';
+    const defaultLang = state.config?.settings?.languages?.default || 'it';
     const newLang = state.currentLanguage === 'en' ? defaultLang : 'en';
     switchLanguage(newLang);
 });
@@ -420,8 +420,8 @@ elements.langSwitch.addEventListener('click', () => {
 window.addEventListener('popstate', (event) => {
     const urlParams = new URLSearchParams(window.location.search);
     const urlLang = urlParams.get('lang');
-    const defaultLang = state.config?.i18n?.defaultLanguage || 'en';
-    const supportedLangs = state.config?.i18n?.supportedLanguages || ['en'];
+    const defaultLang = state.config?.settings?.languages?.default || 'en';
+    const supportedLangs = state.config?.settings?.languages?.supported || ['en'];
 
     let newLang = defaultLang;
     if (urlLang && supportedLangs.includes(urlLang)) {

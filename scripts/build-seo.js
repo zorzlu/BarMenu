@@ -25,7 +25,7 @@ function build() {
         }
 
         const config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
-        const baseUrl = config.seo?.baseUrl || 'https://example.com';
+        const baseUrl = config.settings?.baseUrl || 'https://example.com';
         const allowIndexing = config.seo?.searchEngineIndexing ?? false;
 
         // Get current date for lastmod
@@ -89,10 +89,14 @@ function generateRobotsTxt(baseUrl, allowIndexing) {
 }
 
 function generateSitemapXml(baseUrl, lastmod, config) {
-    const privacySlug = config.pages?.privacyCookiePolicy?.slug || 'privacy-cookie-policy';
-    const allergensSlug = config.pages?.allergens?.slug || 'allergens';
-    const defaultLang = config.i18n?.defaultLanguage || 'it';
-    const supportedLangs = config.i18n?.supportedLanguages || ['en', 'it'];
+    // Find static pages by id from the array
+    const staticPages = config.pages?.staticPages || [];
+    const privacyPage = staticPages.find(p => p.id === 'privacyCookiePolicy');
+    const allergensPage = staticPages.find(p => p.id === 'allergens');
+    const privacySlug = privacyPage?.slug || 'privacy-cookie-policy';
+    const allergensSlug = allergensPage?.slug || 'allergens';
+    const defaultLang = config.settings?.languages?.default || 'it';
+    const supportedLangs = config.settings?.languages?.supported || ['en', 'it'];
 
     // Define page groups (pages with language variants)
     const pageGroups = [

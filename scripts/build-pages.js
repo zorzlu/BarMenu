@@ -85,7 +85,7 @@ function markdownToHtml(markdown) {
 // Replace template placeholders with config values
 function replaceTemplateVars(content, config) {
     const replacements = {
-        '{{companyName}}': config.legal?.companyName || config.app?.name || 'Company Name',
+        '{{companyName}}': config.legal?.companyName || config.branding?.barName || 'Company Name',
         '{{address}}': config.legal?.address || config.contact?.address || 'Address',
         '{{email}}': config.legal?.email || config.contact?.email || 'email@example.com',
         '{{phone}}': config.legal?.phone || config.contact?.phone || '',
@@ -199,84 +199,71 @@ function build() {
         console.warn('Could not load translations, using defaults');
     }
 
-    const baseUrl = config.seo?.baseUrl || 'https://example.com';
+    const baseUrl = config.settings?.baseUrl || 'https://example.com';
+    const supportedLanguages = config.settings?.languages?.supported || ['en', 'it'];
+    const staticPages = config.pages?.staticPages || [];
 
     // Ensure output directories exist
     if (!fs.existsSync(pagesDir)) fs.mkdirSync(pagesDir);
-    if (!fs.existsSync(enDir)) fs.mkdirSync(enDir);
-    if (!fs.existsSync(itDir)) fs.mkdirSync(itDir);
 
-    // Page configurations from config.json
-    const privacySlug = config.pages?.privacyCookiePolicy?.slug || 'privacy-cookie-policy';
-    const allergensSlug = config.pages?.allergens?.slug || 'allergens';
+    // Create language directories dynamically
+    for (const lang of supportedLanguages) {
+        const langDir = path.join(pagesDir, lang);
+        if (!fs.existsSync(langDir)) fs.mkdirSync(langDir);
+    }
 
-    const pages = [
-        {
-            source: 'privacy-policy.it.md',
-            output: `pages/it/${privacySlug}.html`,
-            title: config.pages?.privacyCookiePolicy?.title?.it || 'Privacy e Cookie Policy',
-            description: config.pages?.privacyCookiePolicy?.description?.it || 'Informativa sulla privacy',
-            lang: 'it',
-            slug: privacySlug
-        },
-        {
-            source: 'privacy-policy.en.md',
-            output: `pages/en/${privacySlug}.html`,
-            title: config.pages?.privacyCookiePolicy?.title?.en || 'Privacy and Cookie Policy',
-            description: config.pages?.privacyCookiePolicy?.description?.en || 'Privacy policy',
-            lang: 'en',
-            slug: privacySlug
-        },
-        {
-            source: 'allergens.it.md',
-            output: `pages/it/${allergensSlug}.html`,
-            title: config.pages?.allergens?.title?.it || 'Informazioni sugli Allergeni',
-            description: config.pages?.allergens?.description?.it || 'Lista allergeni',
-            lang: 'it',
-            slug: allergensSlug
-        },
-        {
-            source: 'allergens.en.md',
-            output: `pages/en/${allergensSlug}.html`,
-            title: config.pages?.allergens?.title?.en || 'Allergen Information',
-            description: config.pages?.allergens?.description?.en || 'Allergen list',
-            lang: 'en',
-            slug: allergensSlug
-        }
-    ];
+    console.log('Building static pages from markdown...');
+    console.log(`Languages: ${supportedLanguages.join(', ')}`);
+    console.log(`Static pages: ${staticPages.map(p => p.id).join(', ')}\n`);
 
-    console.log('Building static pages from markdown...\n');
+    // Dynamically generate pages for each static page and language
+    for (const pageConfig of staticPages) {
+        const slug = pageConfig.slug;
+        const templatePath = pageConfig.template; // e.g., "content/privacy-policy.{lang}.md"
 
-    for (const page of pages) {
-        const sourcePath = path.join(contentDir, page.source);
-        const outputPath = path.join(rootDir, page.output);
+        for (const lang of supportedLanguages) {
+            // Build source path from template (replace {lang} placeholder)
+            const sourceFile = templatePath.replace('{lang}', lang);
+            const sourcePath = path.join(rootDir, sourceFile);
+            const outputPath = path.join(pagesDir, lang, `${slug}.html`);
 
-        try {
-            // Read markdown
-            let markdown = fs.readFileSync(sourcePath, 'utf8');
+            // Get localized title and description
+            const title = pageConfig.title?.[lang] || pageConfig.title?.en || pageConfig.id;
+            const description = pageConfig.description?.[lang] || pageConfig.description?.en || '';
 
-            // Replace template variables with config values
-            markdown = replaceTemplateVars(markdown, config);
+            try {
+                // Check if source file exists
+                if (!fs.existsSync(sourcePath)) {
+                    console.warn(`⚠ Skipping: ${sourceFile} (file not found)`);
+                    continue;
+                }
 
-            // Convert to HTML
-            const contentHtml = markdownToHtml(markdown);
+                // Read markdown
+                let markdown = fs.readFileSync(sourcePath, 'utf8');
 
-            // Generate full page with SEO meta
-            const pageConfig = {
-                title: page.title,
-                description: page.description,
-                lang: page.lang,
-                slug: page.slug,
-                baseUrl: baseUrl
-            };
-            const pageHtml = generatePageHtml(contentHtml, pageConfig, translations);
+                // Replace template variables with config values
+                markdown = replaceTemplateVars(markdown, config);
 
-            // Write output
-            fs.writeFileSync(outputPath, pageHtml, 'utf8');
+                // Convert to HTML
+                const contentHtml = markdownToHtml(markdown);
 
-            console.log(`✓ Generated: ${page.output}`);
-        } catch (err) {
-            console.error(`✗ Error processing ${page.source}:`, err.message);
+                // Generate full page with SEO meta
+                const pageData = {
+                    title,
+                    description,
+                    lang,
+                    slug,
+                    baseUrl
+                };
+                const pageHtml = generatePageHtml(contentHtml, pageData, translations);
+
+                // Write output
+                fs.writeFileSync(outputPath, pageHtml, 'utf8');
+
+                console.log(`✓ Generated: pages/${lang}/${slug}.html`);
+            } catch (err) {
+                console.error(`✗ Error processing ${sourceFile}:`, err.message);
+            }
         }
     }
 
