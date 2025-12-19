@@ -26,14 +26,66 @@ function build() {
         const baseUrl = config.settings?.baseUrl || 'https://example.com';
         const defaultLanguage = config.settings?.languages?.default || 'it';
         const supportedLanguages = config.settings?.languages?.supported || ['en', 'it'];
+        const defaultTab = config.settings?.ui?.defaultTab || 'kitchen';
 
         console.log(`Generating index.html hreflang tags...`);
         console.log(`Base URL: ${baseUrl}`);
         console.log(`Default language: ${defaultLanguage}`);
-        console.log(`Supported languages: ${supportedLanguages.join(', ')}\n`);
+        console.log(`Supported languages: ${supportedLanguages.join(', ')}`);
+        console.log(`Default tab: ${defaultTab}\n`);
 
         // Read current index.html
         let html = fs.readFileSync(INDEX_PATH, 'utf8');
+
+        // Update Navbar: Order and Active State
+        const navRegex = /(<nav class="bottom-nav">)([\s\S]*?)(<\/nav>)/;
+        const navMatch = html.match(navRegex);
+
+        if (navMatch) {
+            const navContent = navMatch[2];
+            const kitchenRegex = /<button[^>]*data-target="kitchen"[\s\S]*?<\/button>/;
+            const barRegex = /<button[^>]*data-target="bar"[\s\S]*?<\/button>/;
+
+            const kitchenMatch = navContent.match(kitchenRegex);
+            const barMatch = navContent.match(barRegex);
+
+            if (kitchenMatch && barMatch) {
+                let kitchenBtn = kitchenMatch[0];
+                let barBtn = barMatch[0];
+
+                // Reset Active States
+                kitchenBtn = kitchenBtn.replace(/class="nav-item(\s+active)?"/, 'class="nav-item"');
+                barBtn = barBtn.replace(/class="nav-item(\s+active)?"/, 'class="nav-item"');
+
+                // Set Active State
+                if (defaultTab === 'kitchen') {
+                    kitchenBtn = kitchenBtn.replace('class="nav-item"', 'class="nav-item active"');
+                } else if (defaultTab === 'bar') {
+                    barBtn = barBtn.replace('class="nav-item"', 'class="nav-item active"');
+                }
+
+                // Determine Order
+                // If bar is default, Bar comes first. Otherwise Kitchen first.
+                const firstBtn = (defaultTab === 'bar') ? barBtn : kitchenBtn;
+                const secondBtn = (defaultTab === 'bar') ? kitchenBtn : barBtn;
+
+                // Find the range occupied by these two buttons to replace them
+                const startIndex = Math.min(kitchenMatch.index, barMatch.index);
+                const endIndex = Math.max(kitchenMatch.index + kitchenMatch[0].length, barMatch.index + barMatch[0].length);
+
+                // Reconstruct content
+                const buttonsBlock = `${firstBtn}\n        ${secondBtn}`;
+
+                const newNavContent = navContent.slice(0, startIndex) + buttonsBlock + navContent.slice(endIndex);
+
+                html = html.replace(navRegex, `$1${newNavContent}$3`);
+                console.log(`✓ Updated: Navbar reordered (First: ${defaultTab})`);
+            } else {
+                console.warn('! Warning: Could not find Kitchen or Bar buttons to reorder.');
+            }
+        } else {
+            console.warn('! Warning: <nav class="bottom-nav"> not found.');
+        }
 
         // Generate hreflang block
         const hreflangLines = generateHreflangTags(baseUrl, defaultLanguage, supportedLanguages);

@@ -221,13 +221,43 @@ export function render() {
         }
     }
 
+    // Determine collapsed state from config
+    const collapsedConfig = state.config?.settings?.ui?.collapsedCategories;
+    let useAccordion = false;
+    if (tab === 'kitchen' && collapsedConfig?.kitchen) useAccordion = true;
+    if (tab === 'bar' && collapsedConfig?.bar) useAccordion = true;
+
     filteredCategories.forEach(cat => {
         const categoryName = lang === 'it' ? cat.name_it : cat.name_en;
-        html += `
-            <section class="category-section">
+
+        let headerHtml = '';
+        let wrapperStart = '';
+        let wrapperEnd = '';
+
+        if (useAccordion) {
+            // Accordion Mode
+            wrapperStart = `<details class="category-section category-accordion">`;
+            // Note: No 'open' attribute means it starts collapsed.
+            // Semantic Change: Wrap title in h3 for navigation, use ul for list.
+            headerHtml = `
+                <summary class="category-title">
+                    <h3 class="category-title-text">${escapeHTML(categoryName)}</h3>
+                    <span class="fluent-icon accordion-icon" aria-hidden="true">&#xf2b7;</span>
+                </summary>
+                <ul class="menu-items" role="list">
+            `;
+            wrapperEnd = `</ul></details>`;
+        } else {
+            // Classic Mode (No Accordion)
+            wrapperStart = `<section class="category-section">`;
+            headerHtml = `
                 <h2 class="category-title">${escapeHTML(categoryName)}</h2>
-                <div class="menu-items">
-        `;
+                <ul class="menu-items" role="list">
+            `;
+            wrapperEnd = `</ul></section>`;
+        }
+
+        html += wrapperStart + headerHtml;
 
         cat.items.forEach(item => {
             const name = lang === 'it' ? item.nome_it : item.nome_en;
@@ -245,7 +275,7 @@ export function render() {
                 if (hasDietBadge) {
                     footerHtml += `
                         <span class="food-type-badge ${foodType.class}">
-                            <span class="food-type-icon">${foodType.icon}</span>
+                            <span class="food-type-icon" aria-hidden="true">${foodType.icon}</span>
                             ${foodTypeLabel}
                         </span>
                     `;
@@ -256,19 +286,20 @@ export function render() {
                 footerHtml += '</div>';
             }
 
+            // Semantic Change: Use li instead of article for list items
             html += `
-                <article class="menu-item">
+                <li class="menu-item">
                     <div class="item-header">
-                        <h3 class="item-name">${escapeHTML(name)}</h3>
+                        <h4 class="item-name">${escapeHTML(name)}</h4>
                         ${priceFormatted ? `<span class="item-price">${priceFormatted}</span>` : ''}
                     </div>
                     ${desc ? `<p class="item-description">${escapeHTML(desc)}</p>` : ''}
                     ${footerHtml}
-                </article>
+                </li>
             `;
         });
 
-        html += '</div></section>';
+        html += wrapperEnd;
     });
 
     // Get allergens page slug from staticPages array
@@ -284,6 +315,131 @@ export function render() {
     `;
 
     elements.menuContainer.innerHTML = html;
+
+    // Setup animations for newly rendered accordions
+    setupAccordionAnimations();
+}
+
+function setupAccordionAnimations() {
+    const accordions = document.querySelectorAll('details.category-accordion');
+    const tab = state.currentTab;
+    const autoCollapseConfig = state.config?.settings?.ui?.autoCollapseOthers;
+    // Support both boolean (legacy) and object (granular) config
+    const autoCollapse = (typeof autoCollapseConfig === 'object')
+        ? autoCollapseConfig[tab]
+        : !!autoCollapseConfig;
+
+    // Helper: Collapse Animation
+    const collapse = (details, content) => {
+        if (!details.hasAttribute('open')) return;
+
+        // 1. Lock height and margin to current state
+        const startHeight = content.scrollHeight;
+        content.style.height = `${startHeight}px`;
+        content.style.marginBottom = 'var(--spacing-md)'; // Start from open margin
+        content.style.opacity = '1';
+
+        // 2. Force reflow
+        void content.offsetHeight;
+
+        // 3. Animate to 0
+        content.style.height = '0';
+        content.style.opacity = '0';
+        content.style.marginBottom = '0';
+
+        // Animate details margin if needed (we rely on CSS transition on [open] removal mostly, but we can help it)
+        // details.style.marginBottom is handled by CSS transition when 'open' is removed?
+        // Actually, CSS says details[open] { margin-bottom: 2px }. Wait.
+        // Step 229 removed details[open] margin change. 
+        // Step 237 restored details:last-child { margin-bottom: var(--spacing-xl) }.
+        // The normal margin is 2px.
+        // So details margin effectively stays 2px unless last-child.
+        // So we don't need to animate details.style.marginBottom.
+
+        // 4. Cleanup after transition
+        content.addEventListener('transitionend', function onEnd() {
+            details.removeAttribute('open');
+            content.style.height = '';
+            content.style.opacity = '';
+            content.style.marginBottom = ''; // Reset to default (0)
+            content.removeEventListener('transitionend', onEnd);
+        }, { once: true });
+    };
+
+    // Helper: Expand Animation
+    const expand = (details, content) => {
+        if (details.hasAttribute('open')) return;
+
+        // 1. Open
+        details.setAttribute('open', '');
+
+        // 2. Initial state for animation
+        content.style.height = '0';
+        content.style.opacity = '0';
+        content.style.marginBottom = '0';
+
+        // 3. Force reflow
+        void content.offsetHeight;
+
+        // 4. Animate to target
+        const targetHeight = content.scrollHeight;
+        content.style.height = `${targetHeight}px`;
+        content.style.opacity = '1';
+        content.style.marginBottom = 'var(--spacing-md)';
+
+        // 5. Cleanup
+        content.addEventListener('transitionend', function onEnd() {
+            content.style.height = ''; // Auto height
+            content.style.opacity = '';
+            // Keep margin-bottom applied while open
+            content.style.marginBottom = 'var(--spacing-md)';
+            content.removeEventListener('transitionend', onEnd);
+        }, { once: true });
+    };
+
+    accordions.forEach(details => {
+        const summary = details.querySelector('summary');
+        const content = details.querySelector('.menu-items');
+
+        if (!summary || !content) return;
+
+        summary.addEventListener('click', (e) => {
+            e.preventDefault(); // Control toggling manually
+
+            if (details.hasAttribute('open')) {
+                collapse(details, content);
+            } else {
+                // Determine if we need to collapse others
+                if (autoCollapse) {
+                    let scrollAdjustment = 0;
+                    const currentIndex = Array.from(accordions).indexOf(details);
+
+                    accordions.forEach((otherDetails, index) => {
+                        if (otherDetails !== details && otherDetails.hasAttribute('open')) {
+                            const otherContent = otherDetails.querySelector('.menu-items');
+                            if (otherContent) {
+                                // If a preceding section is closing, track its height to correct scroll
+                                if (index < currentIndex) {
+                                    const style = window.getComputedStyle(otherContent);
+                                    const marginBottom = parseFloat(style.marginBottom) || 0;
+                                    const marginTop = parseFloat(style.marginTop) || 0;
+                                    // Precise calculation of lost height
+                                    scrollAdjustment += otherContent.scrollHeight + marginBottom + marginTop;
+                                }
+                                collapse(otherDetails, otherContent);
+                            }
+                        }
+                    });
+
+                    // Counteract the upward shift due to collapsing sections above
+                    if (scrollAdjustment > 0) {
+                        window.scrollBy({ top: -scrollAdjustment, behavior: 'smooth' });
+                    }
+                }
+                expand(details, content);
+            }
+        });
+    });
 }
 
 function renderAllergens(list) {
@@ -294,7 +450,7 @@ function renderAllergens(list) {
         const name = tAllergen(a.key);
         html += `
             <span class="allergen-chip">
-                <span class="allergen-icon">${a.icon}</span>
+                <span class="allergen-icon" aria-hidden="true">${a.icon}</span>
                 ${escapeHTML(name)}
             </span>
         `;
@@ -350,7 +506,7 @@ function renderInfoPage() {
             html += `
                 <article class="menu-item timeslot-card">
                     <div class="item-header">
-                        <h3 class="item-name">${escapeHTML(label)}</h3>
+                        <h4 class="item-name">${escapeHTML(label)}</h4>
                     </div>
             `;
 
@@ -526,7 +682,7 @@ export function buildAllergenGrid() {
         html += `
             <label class="allergen-checkbox ${isChecked ? 'checked' : ''}" data-key="${colKey}">
                 <input type="checkbox" ${isChecked ? 'checked' : ''} aria-label="${name}">
-                <span class="allergen-checkbox-icon">${allergen.icon}</span>
+                <span class="allergen-checkbox-icon" aria-hidden="true">${allergen.icon}</span>
                 <span class="allergen-checkbox-label">${name}</span>
             </label>
         `;

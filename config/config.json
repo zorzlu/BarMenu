@@ -32,6 +32,17 @@
             "currency": "EUR",
             "currencySymbol": "€",
             "timeFormat": "24h"
+        },
+        "ui": {
+            "collapsedCategories": {
+                "bar": true,
+                "kitchen": true
+            },
+            "autoCollapseOthers": {
+                "bar": true,
+                "kitchen": false
+            },
+            "defaultTab": "bar"
         }
     },
     "branding": {
@@ -153,7 +164,7 @@
         "all_6_soy": {
             "number": 6,
             "key": "soy",
-            "icon": "🫘"
+            "icon": "🫛"
         },
         "all_7_milk": {
             "number": 7,
@@ -178,7 +189,7 @@
         "all_11_sesame": {
             "number": 11,
             "key": "sesame",
-            "icon": "🫛"
+            "icon": "🫘"
         },
         "all_12_sulfites": {
             "number": 12,

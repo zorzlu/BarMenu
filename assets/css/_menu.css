@@ -53,18 +53,29 @@
     color: var(--color-primary);
     margin-bottom: var(--spacing-md);
     margin-top: var(--spacing-sm);
-    padding-left: 4px;
+    padding-left: 16px;
 }
 
 /* Menu Items (Grouped List Style) */
 .menu-items {
     list-style: none;
+    /* Semantic List Reset */
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
     gap: 2px;
     background: transparent;
-    border-radius: var(--border-radius);
     overflow: hidden;
+}
+
+/* Reset for Heading inside Summary */
+.category-title-text {
+    display: inline;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    margin: 0;
 }
 
 .menu-item {
@@ -190,4 +201,100 @@
 .menu-item.timeslot-card {
     padding-top: var(--spacing-md);
     padding-bottom: var(--spacing-md);
+}
+
+/* Accordion Styles */
+details.category-accordion {
+    margin-bottom: 2px;
+    /* transition for margin when [open] changes */
+    transition: margin-bottom 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Add extra space after the last accordion */
+details.category-accordion:last-child {
+    margin-bottom: var(--spacing-xl);
+}
+
+details.category-accordion>summary {
+    list-style: none;
+    /* Remove default marker */
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+
+    /* Styling to match .menu-item base but transparent by default */
+    background: transparent;
+    padding: var(--spacing-md) var(--spacing-md);
+    /* Increased padding for height */
+    min-height: 4rem;
+    /* Ensure it's big enough (approx 2 lines) */
+    margin: 0;
+    /* Remove margins to stack cleanly */
+    border-radius: var(--border-radius);
+    /* Standardize radius */
+
+    /* Text styling */
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-primary);
+
+    transition: border-radius 0.2s ease, margin-bottom 0.2s ease, background-color 0.2s ease;
+}
+
+details.category-accordion>summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Hover color matching header toggle */
+details.category-accordion>summary:hover {
+    background-color: var(--md-sys-color-surface-container-highest);
+    /* Fallback/match toggle hover */
+}
+
+details.category-accordion>summary .accordion-icon {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    /* Adjust icon size if needed */
+    color: var(--color-secondary);
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    /* Invert initial direction if needed, assuming icon is pointing down/up */
+    transform: rotate(180deg);
+    /* Start inverted per user request */
+}
+
+/* Open State */
+details.category-accordion[open]>summary {
+    /* Merged Card: Top rounded only? User said "remove specification of bigger radius".
+       So just keep it 4px (standard). */
+    border-radius: var(--border-radius) var(--border-radius) 4px 4px;
+    margin-bottom: 2px;
+    background: var(--color-surface);
+    /* Solid background when open */
+}
+
+details.category-accordion[open]>summary .accordion-icon {
+    /* Rotate back to 0 (or 360) */
+    transform: rotate(0deg);
+}
+
+/* First item inside open accordion:
+   Must have small top corners to merge with header. */
+details.category-accordion[open]>.menu-items>.menu-item:first-child {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+details.category-accordion>.menu-items {
+    overflow: hidden;
+    transform-origin: top;
+    /* Transition for JS-driven animation */
+    transition: height 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+        opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.allergen-info-footer {
+    margin-top: var(--spacing-xl);
 }

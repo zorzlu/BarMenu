@@ -302,7 +302,7 @@ async function init() {
         if (tabParam && validTabs.includes(tabParam)) {
             state.currentTab = tabParam;
         } else {
-            state.currentTab = 'kitchen';
+            state.currentTab = state.config?.settings?.ui?.defaultTab || 'kitchen';
         }
 
         // Update Nav UI immediately to reflect initial tab
