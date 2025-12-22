@@ -82,8 +82,7 @@ function generateColors() {
         cssContent += `    --color-text-dim: var(--md-sys-color-on-surface-variant);\n`;
         cssContent += `    --color-text-muted: var(--md-sys-color-tertiary);\n`;
         cssContent += `    --color-text-brand: var(--md-sys-color-primary);\n`;
-        cssContent += `    --color-text-inverse: var(--md-sys-color-on-primary-container);\n`;
-        cssContent += `    --color-text-on-info: var(--md-sys-color-tertiary);\n`;
+
         cssContent += `    --color-text-accent-alt: var(--md-sys-color-tertiary);\n`;
 
         cssContent += '\n    /* Backgrounds: App & Structure */\n';
@@ -115,7 +114,7 @@ function generateColors() {
         cssContent += `    --color-bg-chip: var(--md-sys-color-surface-variant);\n`;
         cssContent += `    --color-text-on-chip: var(--md-sys-color-on-surface-variant);\n`;
         cssContent += `    --color-extra-text-on-product-card: var(--md-sys-color-tertiary);\n`;
-        cssContent += `    --color-bg-chip-info: var(--md-sys-color-tertiary-container);\n`;
+
 
         cssContent += '\n    /* Alergens Chips */\n';
         cssContent += `    --color-bg-chip-allergen: var(--md-sys-color-tertiary-container);\n`;
@@ -150,8 +149,7 @@ function generateColors() {
         cssContent += `    --color-bg-allergen-button-checked: var(--md-sys-color-tertiary-container);\n`;
         cssContent += `    --color-text-allergen-button-checked: var(--md-sys-color-on-tertiary-container);\n`;
 
-        // Fixed the invalid token reference --md-sys-color-on-surface-container to --md-sys-color-on-surface
-        cssContent += '\n    --color-text-on-allergen-inactive: var(--md-sys-color-on-surface);\n';
+
 
         cssContent += '\n    /* Decorative */\n';
         cssContent += `    --color-gradient-start: var(--md-sys-color-tertiary-container);\n`;
@@ -162,13 +160,12 @@ function generateColors() {
 
         cssContent += '\n    /* Borders & Dividers */\n';
         cssContent += `    --color-border-subtle: var(--md-sys-color-outline-variant);\n`;
-        cssContent += `    --color-border-strong: var(--md-sys-color-outline);\n`;
+
         cssContent += `    --color-divider: var(--md-sys-color-surface-variant);\n`;
 
         cssContent += '\n    /* Status & Domain */\n';
         cssContent += `    --color-status-success: #34c759;\n`;
-        cssContent += `    --color-status-error: var(--md-sys-color-error);\n`;
-        cssContent += `    --color-bg-error: var(--md-sys-color-error-container);\n`;
+
         cssContent += `    --color-veg-text: var(--md-sys-color-on-secondary-container);\n`;
         cssContent += `    --color-veg-bg: var(--md-sys-color-secondary-container);\n`;
         cssContent += `    --color-veg-vegan-text: var(--md-sys-color-on-secondary-container);\n`;
@@ -176,7 +173,7 @@ function generateColors() {
 
         cssContent += '\n    /* Shadows */\n';
         cssContent += `    --color-shadow: var(--md-sys-color-shadow);\n`;
-        cssContent += `    --color-scrim: var(--md-sys-color-scrim);\n`;
+
 
         cssContent += '}\n';
 

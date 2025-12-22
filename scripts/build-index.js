@@ -37,6 +37,35 @@ function build() {
         // Read current index.html
         let html = fs.readFileSync(INDEX_PATH, 'utf8');
 
+        // --- Branding Injection ---
+        const barName = config.branding?.barName || 'Bar Menu';
+        const navbarLogo = config.branding?.navbarLogo;
+        const heroLogo = config.branding?.heroLogo;
+
+        // Inject Bar Name
+        if (barName) {
+            html = html.replace(/(<h1 class="bar-name" id="storeName">)(.*?)(<\/h1>)/, `$1${barName}$3`);
+        }
+
+        // Inject Navbar Logo
+        if (navbarLogo) {
+            // Replace src and remove hidden attribute if present
+            html = html.replace(
+                /(<img id="navbarLogo" class="store-logo" alt=")(.*?)(" aria-hidden="true")( hidden)?(>)/,
+                `<img id="navbarLogo" class="store-logo" src="${navbarLogo}" alt="${barName}" aria-hidden="true">`
+            );
+        }
+
+        // Inject Hero Logo
+        if (heroLogo) {
+            html = html.replace(
+                /(<img id="heroLogo" class="hero-logo-big" src=")(.*?)(" alt=")(.*?)(">)/,
+                `<img id="heroLogo" class="hero-logo-big" src="${heroLogo}" alt="${barName}">`
+            );
+        }
+        console.log(`✓ Updated: Static Identity (Name: ${barName})`);
+
+
         // Update Navbar: Order and Active State
         const navRegex = /(<nav class="bottom-nav">)([\s\S]*?)(<\/nav>)/;
         const navMatch = html.match(navRegex);

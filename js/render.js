@@ -774,16 +774,11 @@ export function showUpdateIndicator() {
 }
 
 export function applyConfig() {
+    // Only keeping this function structure if other logic is added in future, 
+    // but redundant parts are removed.
     if (!state.config) return;
 
-    const { branding } = state.config;
-
-    if (branding?.barName) elements.storeName.textContent = branding.barName;
-
-    if (branding?.navbarLogo && elements.storeLogo) {
-        elements.storeLogo.src = branding.navbarLogo;
-        elements.storeLogo.hidden = false;
-    }
+    // Branding is now static in build-index.js
 }
 
 // Collapsible Header
@@ -811,31 +806,13 @@ export function toggleHeader() {
 }
 
 export function updateHeroContent() {
-    const config = state.config;
+    // Logic for appName, heroLogo and navbarLogo is now static in index.html (via build-index.js)
+    // Only dynamic parts like claims remain.
 
-    const appName = config?.branding?.barName || 'Menu';
+    const config = state.config;
     const claim = tConfig(config?.branding?.claim, '');
     if (elements.heroClaim && claim) {
         elements.heroClaim.textContent = claim;
-    }
-
-    const heroLogoUrl = config?.branding?.heroLogo;
-    if (heroLogoUrl) {
-        elements.heroLogo.src = heroLogoUrl;
-        elements.heroLogo.alt = appName;
-        elements.heroLogo.hidden = false;
-    } else {
-        elements.heroLogo.hidden = true;
-    }
-
-    const navbarLogoUrl = config?.branding?.navbarLogo;
-    if (elements.navbarLogo && navbarLogoUrl) {
-        elements.navbarLogo.src = navbarLogoUrl;
-        elements.navbarLogo.hidden = false;
-    }
-
-    if (elements.storeName) {
-        elements.storeName.textContent = appName;
     }
 
     elements.welcomeHero.classList.remove('hidden');
