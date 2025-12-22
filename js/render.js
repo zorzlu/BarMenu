@@ -156,23 +156,8 @@ export function updateUILanguage() {
     // Re-render menu with new language
     render();
 
-    // Update theme color
-    updateThemeColor();
 }
 
-export function updateThemeColor() {
-    const computedStyle = getComputedStyle(document.documentElement);
-    let themeColor = computedStyle.getPropertyValue('--color-bg').trim();
-    if (!themeColor) themeColor = '#ffffff';
-
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    if (!metaThemeColor) {
-        metaThemeColor = document.createElement('meta');
-        metaThemeColor.name = 'theme-color';
-        document.head.appendChild(metaThemeColor);
-    }
-    metaThemeColor.content = themeColor;
-}
 
 export function render() {
     const tab = state.currentTab;

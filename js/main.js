@@ -18,7 +18,6 @@ import {
     openFilterModal,
     closeFilterModal,
     announceToSR,
-    updateThemeColor,
     updateHeroContent,
     syncModalToState
 } from './render.js';
@@ -288,7 +287,6 @@ async function init() {
         await loadTranslations();
 
         // Render static content IMMEDIATELY
-        updateThemeColor();
         updateHeroContent();
         updateUILanguage();
         updateActiveFilterDisplay();
