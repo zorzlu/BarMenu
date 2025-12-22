@@ -87,19 +87,29 @@ function generateColors() {
         cssContent += `    --color-text-accent-alt: var(--md-sys-color-tertiary);\n`;
 
         cssContent += '\n    /* Backgrounds: App & Structure */\n';
-        cssContent += `    --color-bg-body: var(--md-sys-color-surface-container);\n`;
-        cssContent += `    --color-bg-header: var(--md-sys-color-surface-container);\n`;
-        cssContent += `    --color-bg-app-sheet: var(--md-sys-color-surface);\n`;
+        cssContent += `    --color-bg-body: var(--md-sys-color-surface-dim);\n`;
+        cssContent += `    --color-bg-header: var(--md-sys-color-surface-dim);\n`;
+        cssContent += `    --color-bg-app-sheet: var(--md-sys-color-surface-container-high);\n`;
+        cssContent += `    --color-bg-scrim: var(--md-sys-color-surface-container);\n`;
+        cssContent += `    --color-bg-nav: var(--md-sys-color-primary-container);\n`;
+        cssContent += `    --color-nav-item-active-bg: var(--md-sys-color-on-primary-container);\n`;
+        cssContent += `    --color-nav-item-active-fg: var(--md-sys-color-primary-container);\n`;
+        cssContent += `    --color-nav-text: var(--md-sys-color-on-primary-container);\n`;
+
+        cssContent += '\n    --color-outline-buttons: var(--md-sys-color-primary);\n';
 
         cssContent += '\n    /* Backgrounds: Surfaces & Components */\n';
-        cssContent += `    --color-bg-card: var(--md-sys-color-surface-container-lowest);\n`;
-        cssContent += `    --color-bg-surface-subtle: var(--md-sys-color-surface-container-low);\n`;
-        cssContent += `    --color-bg-surface-hover: var(--md-sys-color-surface-container-highest);\n`;
-        cssContent += `    --color-bg-segment: var(--md-sys-color-surface-container-high);\n`;
+        cssContent += `    --color-bg-product-card: var(--md-sys-color-surface-container-lowest);\n`;
+        cssContent += `    --color-bg-product-card-subtle: var(--md-sys-color-surface-container-low);\n`;
+        cssContent += `    --color-shadow-product-card: var(--md-sys-color-surface-dim);\n`;
+        cssContent += `    --color-bg-product-card-hover: var(--md-sys-color-surface-container-highest);\n`;
 
-        cssContent += '\n    /* Chrome & Features */\n';
-        cssContent += `    --color-bg-nav: var(--md-sys-color-primary-container);\n`;
-        cssContent += `    --color-bg-scrim: var(--md-sys-color-surface-container);\n`;
+        cssContent += '\n\n';
+        cssContent += `    --color-bg-info-card-alt: var(--md-sys-color-tertiary-container);\n`;
+        cssContent += `    --color-text-info-card-alt: var(--md-sys-color-on-tertiary-container);\n`;
+        cssContent += `    --color-bg-info-card: var(--md-sys-color-secondary-container);\n`;
+        cssContent += `    --color-text-info-card: var(--md-sys-color-on-secondary-container);\n`;
+
 
         cssContent += '\n    /* Chips & Feedback */\n';
         cssContent += `    --color-bg-chip: var(--md-sys-color-surface-variant);\n`;
@@ -107,16 +117,48 @@ function generateColors() {
         cssContent += `    --color-extra-text-on-product-card: var(--md-sys-color-tertiary);\n`;
         cssContent += `    --color-bg-chip-info: var(--md-sys-color-tertiary-container);\n`;
 
+        cssContent += '\n    /* Alergens Chips */\n';
+        cssContent += `    --color-bg-chip-allergen: var(--md-sys-color-tertiary-container);\n`;
+        cssContent += `    --color-text-on-chip-allergen: var(--md-sys-color-on-tertiary-container);\n`;
+
+        cssContent += '\n    /* Kitchen Status Cards */\n';
+        cssContent += `    --color-bg-kitchen-status-card: transparent;\n`;
+        cssContent += `    --color-border-kitchen-status-card: var(--md-sys-color-tertiary);\n`;
+        cssContent += `    --color-text-kitchen-status-card: var(--md-sys-color-tertiary);\n`;
+        cssContent += `    --color-bg-kitchen-status-card-active: #66cb70;\n`;
+        cssContent += `    --color-text-kitchen-status-card-active: #042F10;\n`;
+
         cssContent += '\n    /* Interactive & States */\n';
         cssContent += `    --color-bg-cta-primary: var(--md-sys-color-primary);\n`;
         cssContent += `    --color-text-cta-primary: var(--md-sys-color-on-primary);\n`;
-        cssContent += `    --color-nav-item-active-bg: var(--md-sys-color-on-primary-container);\n`;
-        cssContent += `    --color-nav-item-active-fg: var(--md-sys-color-primary-container);\n`;
-        cssContent += `    --color-nav-text: var(--md-sys-color-on-primary-container);\n`;
+        cssContent += `    --color-bg-cta-outline: var(--md-sys-color-surface-container);\n`;
+        cssContent += `    --color-border-cta-outline: var(--md-sys-color-outline-variant);\n`;
+        cssContent += `    --color-text-on-cta-outline: var(--md-sys-color-primary);\n`;
+        cssContent += `    --color-bg-cta-outline-hover: var(--md-sys-color-surface-container-highest);\n`;
+        cssContent += `    --color-border-cta-filters: var(--md-sys-color-outline-variant);\n`;
+        cssContent += `    --color-text-cta-filters: var(--md-sys-color-on-surface);\n`;
+        cssContent += `    --color-bg-surface-cta-filters-hover: var(--md-sys-color-surface-container-highest);\n`;
+
+        cssContent += '\n    /* Modals & Segments */\n';
+        cssContent += `    --color-bg-modal: var(--md-sys-color-surface-bright);\n`;
+        cssContent += `    --color-bg-segment: var(--md-sys-color-surface-container);\n`;
+        cssContent += `    --color-bg-diet-active: var(--md-sys-color-secondary-container);\n`;
+        cssContent += `    --color-text-on-diet-active: var(--md-sys-color-on-secondary-container);\n`;
+        cssContent += `    --color-border-diet-active: var(--md-sys-color-on-secondary-container);\n`;
+        cssContent += `    --color-bg-allergen-button-inactive: var(--md-sys-color-surface-container);\n`;
+        cssContent += `    --color-bg-allergen-button-hover: var(--md-sys-color-surface-variant);\n`;
+        cssContent += `    --color-bg-allergen-button-checked: var(--md-sys-color-tertiary-container);\n`;
+        cssContent += `    --color-text-allergen-button-checked: var(--md-sys-color-on-tertiary-container);\n`;
+
+        // Fixed the invalid token reference --md-sys-color-on-surface-container to --md-sys-color-on-surface
+        cssContent += '\n    --color-text-on-allergen-inactive: var(--md-sys-color-on-surface);\n';
 
         cssContent += '\n    /* Decorative */\n';
-        cssContent += `    --color-gradient-start: var(--md-sys-color-secondary-container);\n`;
+        cssContent += `    --color-gradient-start: var(--md-sys-color-tertiary-container);\n`;
         cssContent += `    --color-gradient-end: var(--md-sys-color-primary-container);\n`;
+        cssContent += `    --color-text-on-gradient: var(--md-sys-color-on-primary-container);\n`;
+        cssContent += `    --color-card-info-page: var(--md-sys-color-surface-container-lowest);\n`;
+
 
         cssContent += '\n    /* Borders & Dividers */\n';
         cssContent += `    --color-border-subtle: var(--md-sys-color-outline-variant);\n`;
@@ -127,11 +169,10 @@ function generateColors() {
         cssContent += `    --color-status-success: #34c759;\n`;
         cssContent += `    --color-status-error: var(--md-sys-color-error);\n`;
         cssContent += `    --color-bg-error: var(--md-sys-color-error-container);\n`;
-
         cssContent += `    --color-veg-text: var(--md-sys-color-on-secondary-container);\n`;
         cssContent += `    --color-veg-bg: var(--md-sys-color-secondary-container);\n`;
-        cssContent += `    --color-veg-vegan-text: var(--md-sys-color-on-tertiary-container);\n`;
-        cssContent += `    --color-veg-vegan-bg: var(--md-sys-color-tertiary-container);\n`;
+        cssContent += `    --color-veg-vegan-text: var(--md-sys-color-on-secondary-container);\n`;
+        cssContent += `    --color-veg-vegan-bg: var(--md-sys-color-secondary-container);\n`;
 
         cssContent += '\n    /* Shadows */\n';
         cssContent += `    --color-shadow: var(--md-sys-color-shadow);\n`;

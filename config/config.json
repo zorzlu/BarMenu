@@ -22,8 +22,8 @@
         },
         "theme": {
             "mode": "dark",
-            "accentColor": "#A6507E",
-            "themeColor": "#A6507E"
+            "accentColor": "#C0413E",
+            "themeColor": "#C0413E"
         },
         "fonts": {
             "primary": "DM Sans, sans-serif"

@@ -54,7 +54,7 @@
 }
 
 .page-content {
-    background: var(--color-bg-card);
+    background: var(--color-bg-app-sheet);
     border-radius: var(--border-radius);
     padding: var(--spacing-lg);
 }

@@ -1,40 +1,40 @@
 :root {
-    --md-sys-color-primary: #ffafd5;
-    --md-sys-color-on-primary: #5b113f;
-    --md-sys-color-primary-container: #a6507e;
-    --md-sys-color-on-primary-container: #ffecf2;
-    --md-sys-color-secondary: #ebb8cf;
-    --md-sys-color-on-secondary: #482537;
-    --md-sys-color-secondary-container: #613b4e;
-    --md-sys-color-on-secondary-container: #d9a7bd;
-    --md-sys-color-tertiary: #ffb59e;
-    --md-sys-color-on-tertiary: #5d1800;
-    --md-sys-color-tertiary-container: #ae5335;
-    --md-sys-color-on-tertiary-container: #ffede9;
+    --md-sys-color-primary: #ffb3ad;
+    --md-sys-color-on-primary: #68000a;
+    --md-sys-color-primary-container: #c0413e;
+    --md-sys-color-on-primary-container: #ffecea;
+    --md-sys-color-secondary: #ffb3ad;
+    --md-sys-color-on-secondary: #54201d;
+    --md-sys-color-secondary-container: #703532;
+    --md-sys-color-on-secondary-container: #f1a09a;
+    --md-sys-color-tertiary: #fdba5b;
+    --md-sys-color-on-tertiary: #452b00;
+    --md-sys-color-tertiary-container: #976200;
+    --md-sys-color-on-tertiary-container: #ffeedc;
     --md-sys-color-error: #ffb4ab;
     --md-sys-color-on-error: #690005;
     --md-sys-color-error-container: #93000a;
     --md-sys-color-on-error-container: #ffdad6;
-    --md-sys-color-background: #181114;
-    --md-sys-color-on-background: #eedfe3;
-    --md-sys-color-surface: #181114;
-    --md-sys-color-on-surface: #eedfe3;
-    --md-sys-color-surface-variant: #524249;
-    --md-sys-color-on-surface-variant: #d7c1c9;
-    --md-sys-color-outline: #9f8c93;
-    --md-sys-color-outline-variant: #524249;
+    --md-sys-color-background: #1c100f;
+    --md-sys-color-on-background: #f5dddb;
+    --md-sys-color-surface: #1c100f;
+    --md-sys-color-on-surface: #f5dddb;
+    --md-sys-color-surface-variant: #58413f;
+    --md-sys-color-on-surface-variant: #dfbfbc;
+    --md-sys-color-outline: #a78a87;
+    --md-sys-color-outline-variant: #58413f;
     --md-sys-color-shadow: #000000;
     --md-sys-color-scrim: #000000;
-    --md-sys-color-inverse-surface: #eedfe3;
-    --md-sys-color-inverse-on-surface: #372e31;
-    --md-sys-color-inverse-primary: #94416f;
-    --md-sys-color-surface-dim: #181114;
-    --md-sys-color-surface-bright: #40373a;
-    --md-sys-color-surface-container-lowest: #130c0f;
-    --md-sys-color-surface-container-low: #21191d;
-    --md-sys-color-surface-container: #251d21;
-    --md-sys-color-surface-container-high: #30282b;
-    --md-sys-color-surface-container-highest: #3b3236;
+    --md-sys-color-inverse-surface: #f5dddb;
+    --md-sys-color-inverse-on-surface: #3b2d2c;
+    --md-sys-color-inverse-primary: #ac3231;
+    --md-sys-color-surface-dim: #1c100f;
+    --md-sys-color-surface-bright: #443634;
+    --md-sys-color-surface-container-lowest: #160b0a;
+    --md-sys-color-surface-container-low: #251817;
+    --md-sys-color-surface-container: #291c1b;
+    --md-sys-color-surface-container-high: #342726;
+    --md-sys-color-surface-container-highest: #403130;
 
     /* ==============================================
        Semantic Application Mappings
@@ -52,7 +52,7 @@
     /* Backgrounds: App & Structure */
     --color-bg-body: var(--md-sys-color-surface-dim);
     --color-bg-header: var(--md-sys-color-surface-dim);
-    --color-bg-app-sheet: var(--md-sys-color-surface-container);
+    --color-bg-app-sheet: var(--md-sys-color-surface-container-high);
     --color-bg-scrim: var(--md-sys-color-surface-container);
     --color-bg-nav: var(--md-sys-color-primary-container);
     --color-nav-item-active-bg: var(--md-sys-color-on-primary-container);
@@ -64,16 +64,14 @@
     /* Backgrounds: Surfaces & Components */
     --color-bg-product-card: var(--md-sys-color-surface-container-lowest);
     --color-bg-product-card-subtle: var(--md-sys-color-surface-container-low);
-    --color-shadow-product-card: var(--md-sys-color-shadow);
+    --color-shadow-product-card: var(--md-sys-color-surface-dim);
     --color-bg-product-card-hover: var(--md-sys-color-surface-container-highest);
-
 
 
     --color-bg-info-card-alt: var(--md-sys-color-tertiary-container);
     --color-text-info-card-alt: var(--md-sys-color-on-tertiary-container);
     --color-bg-info-card: var(--md-sys-color-secondary-container);
     --color-text-info-card: var(--md-sys-color-on-secondary-container);
-
 
     /* Chips & Feedback */
     --color-bg-chip: var(--md-sys-color-surface-variant);
@@ -85,21 +83,25 @@
     --color-bg-chip-allergen: var(--md-sys-color-tertiary-container);
     --color-text-on-chip-allergen: var(--md-sys-color-on-tertiary-container);
 
-    --color-bg-kitchen-status-card: var(--md-sys-color-surface);
-    --color-border-kitchen-status-card: var(--md-sys-color-outline-variant);
-    --color-text-kitchen-status-card: var(--md-sys-color-secondary);
+    /* Kitchen Status Cards */
+    --color-bg-kitchen-status-card: transparent;
+    --color-border-kitchen-status-card: var(--md-sys-color-tertiary);
+    --color-text-kitchen-status-card: var(--md-sys-color-tertiary);
     --color-bg-kitchen-status-card-active: #66cb70;
     --color-text-kitchen-status-card-active: #042F10;
-
-
 
     /* Interactive & States */
     --color-bg-cta-primary: var(--md-sys-color-primary);
     --color-text-cta-primary: var(--md-sys-color-on-primary);
+    --color-bg-cta-outline: var(--md-sys-color-surface-container);
+    --color-border-cta-outline: var(--md-sys-color-outline-variant);
+    --color-text-on-cta-outline: var(--md-sys-color-primary);
+    --color-bg-cta-outline-hover: var(--md-sys-color-surface-container-highest);
     --color-border-cta-filters: var(--md-sys-color-outline-variant);
     --color-text-cta-filters: var(--md-sys-color-on-surface);
     --color-bg-surface-cta-filters-hover: var(--md-sys-color-surface-container-highest);
 
+    /* Modals & Segments */
     --color-bg-modal: var(--md-sys-color-surface-bright);
     --color-bg-segment: var(--md-sys-color-surface-container);
     --color-bg-diet-active: var(--md-sys-color-secondary-container);
@@ -110,13 +112,13 @@
     --color-bg-allergen-button-checked: var(--md-sys-color-tertiary-container);
     --color-text-allergen-button-checked: var(--md-sys-color-on-tertiary-container);
 
-    --color-text-on-allergen-inactive: var(--md-sys-color-on-surface-container);
-
+    --color-text-on-allergen-inactive: var(--md-sys-color-on-surface);
 
     /* Decorative */
-    --color-gradient-start: var(--md-sys-color-secondary-container);
+    --color-gradient-start: var(--md-sys-color-tertiary-container);
     --color-gradient-end: var(--md-sys-color-primary-container);
     --color-text-on-gradient: var(--md-sys-color-on-primary-container);
+    --color-card-info-page: var(--md-sys-color-surface-container-lowest);
 
     /* Borders & Dividers */
     --color-border-subtle: var(--md-sys-color-outline-variant);

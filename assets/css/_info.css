@@ -30,7 +30,7 @@
 }
 
 .info-section-card {
-    background: var(--color-bg-card);
+    background: var(--color-card-info-page);
     border-radius: var(--border-radius);
     padding: var(--spacing-md);
 }

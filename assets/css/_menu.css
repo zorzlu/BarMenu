@@ -184,11 +184,11 @@
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: var(--color-bg-chip-info);
+    background: var(--color-bg-chip-allergen);
     border-radius: 6px;
     font-size: 0.7rem;
     font-weight: 600;
-    color: var(--color-text-on-chip);
+    color: var(--color-text-on-chip-allergen);
     line-height: 1;
 }
 
@@ -240,10 +240,10 @@ details.category-accordion>summary {
     user-select: none;
 
     /* Styling to match .menu-item base but transparent by default */
-    background: transparent;
+    /* background: transparent; */
     padding: var(--spacing-md) var(--spacing-md);
     /* Increased padding for height */
-    min-height: 4rem;
+    min-height: 4.5rem;
     /* Ensure it's big enough (approx 2 lines) */
     margin: 0;
     /* Remove margins to stack cleanly */
