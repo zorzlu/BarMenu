@@ -24,9 +24,15 @@ import {
 
 // Scroll threshold for header collapse
 const SCROLL_THRESHOLD = 50;
+// CSS transition duration for app-container (from _layout.css)
+const ANIMATION_DURATION_MS = 350;
 let isInitialized = false;
 let scrollTicking = false;
 let touchStartY = 0;
+// Track last wheel direction at top for overscroll detection
+let lastWheelDirectionAtTop = null;
+// Prevent scroll events during expansion animation
+let isAnimating = false;
 
 // Load Config
 async function loadConfig() {
@@ -160,21 +166,56 @@ function switchTab(newTab) {
 }
 
 function handleScroll() {
-    if (!isInitialized) return;
+    if (!isInitialized || isAnimating) return; // Ignore during animation
 
     const currentScrollY = window.scrollY;
     const scrollDelta = currentScrollY - state.lastScrollY;
 
+    // Collapse header when scrolling down past threshold
     if (scrollDelta > 0 && currentScrollY > SCROLL_THRESHOLD && state.headerExpanded) {
         setHeaderExpanded(false);
+    }
+
+    // Reset wheel tracker when not at top
+    if (Math.abs(currentScrollY) >= 1) {
+        lastWheelDirectionAtTop = null;
     }
 
     state.lastScrollY = currentScrollY;
 }
 
 function handleWheel(e) {
-    if (window.scrollY <= 0 && e.deltaY < 0 && !state.headerExpanded) {
-        setHeaderExpanded(true, true);
+    if (isAnimating) return; // Ignore during animation
+
+    const atTop = Math.abs(window.scrollY) < 1;
+    const scrollingUp = e.deltaY < 0;
+
+    if (!atTop) {
+        // Not at top - reset tracker
+        lastWheelDirectionAtTop = null;
+        return;
+    }
+
+    // At top of page
+    if (scrollingUp) {
+        // Scrolling up while at top
+        if (lastWheelDirectionAtTop === 'up' && !state.headerExpanded) {
+            // Second consecutive up-scroll - expand hero
+            // DON'T scroll to top - user is already there!
+
+            // Lock scroll events during animation
+            isAnimating = true;
+            setTimeout(() => { isAnimating = false; }, ANIMATION_DURATION_MS);
+
+            setHeaderExpanded(true, false);
+            lastWheelDirectionAtTop = null; // Reset after expansion
+        } else {
+            // First up-scroll at top - track it
+            lastWheelDirectionAtTop = 'up';
+        }
+    } else {
+        // Scrolling down while at top - reset
+        lastWheelDirectionAtTop = null;
     }
 }
 

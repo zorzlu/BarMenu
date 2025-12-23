@@ -162,7 +162,13 @@ html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
     scrollbar-color: var(--color-text-dim) var(--color-bg-header);
+    /* Prevent pull-to-refresh on mobile (iOS Safari, Chrome) */
+    overscroll-behavior: auto;
 
+}
+
+html:has(.app-container.collapsed) {
+    overscroll-behavior-y: none;
 }
 
 body {
@@ -175,7 +181,14 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    /* Prevent pull-to-refresh on mobile (iOS Safari, Chrome) */
+    /* overscroll-behavior-y: auto; */
 }
+
+/* Allow pull-to-refresh when hero is expanded (optional) */
+/* body:has(.app-container.collapsed) {
+    overscroll-behavior-y: none;
+} */
 
 /* Utilities */
 .no-scrollbar::-webkit-scrollbar {

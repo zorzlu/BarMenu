@@ -81,9 +81,9 @@
     --color-text-on-chip-allergen: var(--md-sys-color-on-tertiary-container);
 
     /* Kitchen Status Cards */
-    --color-bg-kitchen-status-card: transparent;
-    --color-border-kitchen-status-card: var(--md-sys-color-tertiary);
-    --color-text-kitchen-status-card: var(--md-sys-color-tertiary);
+    --color-bg-kitchen-status-card: var(--md-sys-color-secondary-container);
+    --color-border-kitchen-status-card: transparent;
+    --color-text-kitchen-status-card: var(--md-sys-color-on-secondary-container);
     --color-bg-kitchen-status-card-active: #66cb70;
     --color-text-kitchen-status-card-active: #042F10;
 
