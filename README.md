@@ -109,9 +109,9 @@ npx serve -l 3456
 ### Build Commands
 
 ```bash
-npm run generate-theme  # Generate color theme
-npm run build-pages     # Build static pages
-npm run build-index     # Build index.html
+npm run generate-theme  # Generate theme using Material Design 3 color system starting from the colors defined in config.json and the theme style (light/dark)
+npm run build-pages     # Build static pages (privacy-cookie policy and allergens info)
+npm run build-index     # Build index.html including brand colors, and SEO metadata
 npm run build-seo       # Generate sitemap and robots.txt
 npm run build           # Run all build scripts
 ```

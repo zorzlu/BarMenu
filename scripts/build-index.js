@@ -138,6 +138,47 @@ function build() {
         );
         console.log(`✓ Updated: Theme color to ${themeColor} (from --color-bg-header)`);
 
+        // Update Description (Meta Tag)
+        const desc = config.pages?.menuPage?.description?.[defaultLanguage] || 'Menu';
+        html = html.replace(
+            /<meta name="description" content="[^"]*">/,
+            `<meta name="description" content="${desc}">`
+        );
+        console.log(`✓ Updated: Meta Description (${defaultLanguage})`);
+
+        // Inject JSON-LD Structure Data (Restaurant)
+        // Note: Opening Hours are intentionally OMITTED to let Google Business Profile take precedence.
+        const restaurantSchema = {
+            "@context": "https://schema.org",
+            "@type": config.seo?.schemaType || "Restaurant",
+            "name": config.branding?.barName || "Bar Menu",
+            "image": config.branding?.navbarLogo ? (baseUrl + '/' + config.branding.navbarLogo) : undefined,
+            "url": baseUrl,
+            "address": {
+                "@type": "PostalAddress",
+                "streetAddress": config.legal?.address || config.contact?.address,
+                "addressCountry": config.seo?.country || "IT"
+            },
+            "telephone": config.contact?.phone || config.legal?.phone,
+            "email": config.contact?.email || config.legal?.email,
+            "menu": baseUrl
+        };
+
+        // Remove undefined keys
+        Object.keys(restaurantSchema).forEach(key => restaurantSchema[key] === undefined && delete restaurantSchema[key]);
+
+        const scriptTag = `
+    <script type="application/ld+json">
+    ${JSON.stringify(restaurantSchema, null, 4)}
+    </script>`;
+
+        // Remove existing JSON-LD if present (to avoid duplicates on re-runs)
+        html = html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, '');
+
+        // Inject before </head>
+        html = html.replace('</head>', `${scriptTag}\n</head>`);
+        console.log('✓ Injected: JSON-LD Structured Data');
+
 
         // Update Navbar: Order and Active State
         const navRegex = /(<nav class="bottom-nav">)([\s\S]*?)(<\/nav>)/;

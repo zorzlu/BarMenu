@@ -56,7 +56,9 @@
         }
     },
     "seo": {
-        "searchEngineIndexing": false
+        "searchEngineIndexing": false,
+        "schemaType": "Restaurant",
+        "country": "IT"
     },
     "inputData": {
         "menuUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSFho5epvb3RjZnt9ilXc0EroZafsams148n0dUge6IXJrQFOEDB7_6KvtNHO1OkxhmJsIXOHdiuGxZ/pub?gid=1317594543&single=true&output=csv",
